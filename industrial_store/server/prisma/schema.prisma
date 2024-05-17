@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:12345@localhost:5432/industrial_shop?schema=public"
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  password        String    
+
+  cart            Cart?
+  profile         Profile?
+  employee        Employee?
+  orders          Order[]
+}
+
+model Profile{
+  id              Int       @id @default(autoincrement())
+  name            String
+  surname         String
+  phone_number    String?
+  birth_date      DateTime
+  balance         Decimal   @default(0.00)
+
+  user            User      @relation(fields:[userId], references: [id])
+
+  userId          Int       @unique
+}
+
+model Employee{
+  id              Int       @id @default(autoincrement())
+  role            String  
+
+  user            User      @relation(fields:[userId], references: [id])
+
+  userId          Int       @unique
+}
+
+model Product {
+  id              Int       @id @default(autoincrement())
+  photography_url String?
+  price           Decimal
+  description     String?
+  stock           Int
+
+  category        Category  @relation(fields: [categoryName], references: [name])
+
+  categoryName    String    @map("category_name")
+
+  cartItems       CartItem[]
+  orderItems      OrderItem[]
+
+}
+
+model Category {
+  id              Int       @id @default(autoincrement())
+  name            String    @unique
+  products        Product[]
+}
+
+model Cart {
+  id              Int       @id @default(autoincrement())
+  itemCount       Int
+  total           Decimal
+
+  user            User      @relation(fields: [userId], references: [id])
+
+  userId          Int       @unique
+  
+  items           CartItem[]
+  
+}
+
+model CartItem {
+  id              Int       @id @default(autoincrement())
+  quantity        Int
+
+  cart            Cart      @relation(fields: [cartId], references: [id])
+  product         Product   @relation(fields: [productId], references: [id])
+
+  cartId          Int
+  productId       Int
+}
+
+model Order {
+  id              Int       @id @default(autoincrement())
+  status          String
+  total           Decimal
+  order_date      DateTime  @default(now())
+  user            User      @relation(fields: [userId], references: [id])
+
+  userId          Int
+
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id              Int       @id @default(autoincrement())
+  quantity        Int
+
+  order           Order     @relation(fields: [orderId], references: [id])
+  product         Product   @relation(fields: [productId], references: [id])
+
+  orderId         Int
+  productId       Int       
+}
