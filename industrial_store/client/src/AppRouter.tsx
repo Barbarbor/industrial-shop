@@ -1,28 +1,31 @@
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import NavPanel from './components/shared/NavPanel'
-import Footer from './components/shared/Footer'
-
-import MainPage from './components/pages/MainPage'
-import CartPage from './components/pages/CartPage'
-import ProductPage from './components/pages/ProductPage'
-import AboutUsPage from './components/pages/AboutUsPage'
-
-import LoginForm from './components/forms/LoginForm'
-import RegistrationForm from './components/forms/RegisterForm'
+import SupplyPage from './components/pages/SupplyPage';
+import CategoryPage from './components/pages/CategoryPage';
+import ProductPage from './components/pages/ProductPage';
+import ManufacturerPage from './components/pages/ManufacturerPage';
+import SupplierPage from './components/pages/SupplierPage';
+import BuyerPage from './components/pages/BuyerPage';
+import SellerPage from './components/pages/SellerPage';
+import SalePage from './components/pages/SalePage';
+import SchedulePage from './components/pages/SchedulePage';
+import SalaryPage from './components/pages/SalaryPage';
 const AppRouter = () => {
    
     return (
         <BrowserRouter>
-            <NavPanel/>
-            <Routes>
-              <Route path='/' element={<MainPage/>}/>
-              <Route path='/cart' element={<CartPage/>}/> 
-              <Route path='/product/:productId' element={<ProductPage/>}/>
-              <Route path='/register' element={<RegistrationForm/>}/>
-              <Route path='/login' element={<LoginForm/>}/> 
-              <Route path='/about-us' element={<AboutUsPage/>}/>
-            </Routes>
-            <Footer/>
+          <Routes>
+            <Route path='/categories' element={<CategoryPage/>}/>
+            <Route path='/products' element={<ProductPage/>}/>
+            <Route path='/supplies' element={<SupplyPage/>}/>
+            <Route path ='/manufacturer' element={<ManufacturerPage/>}/>
+            <Route path='/supplier' element={<SupplierPage/>}/>
+            <Route path='/buyer' element = {<BuyerPage/>}/>
+            <Route path='/seller' element = {<SellerPage/>}/>
+            <Route path='/sale' element = {<SalePage/>}/>
+            <Route path='/schedule' element = {<SchedulePage/>}/>
+            <Route path='/salary' element ={<SalaryPage/>}/>
+          </Routes>
         </BrowserRouter>
 
     )

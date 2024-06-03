@@ -1,17 +1,29 @@
-
-
 export interface IProduct {
   id: number;
   name: string;
   price: number;
-  imageUrl: string;
+  stock: number;
+  categoryId: number;
+  manufacturerId: number;
+}
+export interface IProductFilters{
+  name?:string;
+  categoryId?:number;
+  manufacturerId?:number;
+}
+export interface ICreateProduct {
+  name: string;
+  price: number;
+  stock: number;
+  categoryId: number;
+  manufacturerId: number;
 }
 
-export interface ICartProduct {
-    id:number;
-    product: IProduct;
-    quantity: number;
-}
-export interface IProductDetail extends IProduct{
-    description:string;
+export interface IUpdateProduct {
+  id: number;
+  name: string;
+  price: number;
+  stock: number;
+  categoryId: number;
+  manufacturerId: number;
 }

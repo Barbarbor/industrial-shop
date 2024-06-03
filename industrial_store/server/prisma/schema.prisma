@@ -5,106 +5,104 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = "postgresql://postgres:12345@localhost:5432/industrial_shop?schema=public"
+  
 }
 
-model User {
-  id              Int       @id @default(autoincrement())
-  email           String    @unique
-  password        String    
-
-  cart            Cart?
-  profile         Profile?
-  employee        Employee?
-  orders          Order[]
+model Seller {
+  id                Int           @id @default(autoincrement())
+  name              String        @db.VarChar(100)
+  surname           String        @db.VarChar(100)
+  workSchedules     WorkSchedule[]
+  sales             Sale[]
+  salaries          Salary[]
+  profitPercentage  Decimal       @db.Decimal(5, 2)
+  role              String        @db.VarChar(50)
 }
 
-model Profile{
-  id              Int       @id @default(autoincrement())
-  name            String
-  surname         String
-  phone_number    String?
-  birth_date      DateTime
-  balance         Decimal   @default(0.00)
-
-  user            User      @relation(fields:[userId], references: [id])
-
-  userId          Int       @unique
+model WorkSchedule {
+  id              Int           @id @default(autoincrement())
+  day             DateTime
+  startTime       String        @db.VarChar(5)  
+  endTime         String        @db.VarChar(5)  
+  seller          Seller        @relation(fields: [sellerId], references: [id])
+  sellerId        Int
 }
 
-model Employee{
-  id              Int       @id @default(autoincrement())
-  role            String  
-
-  user            User      @relation(fields:[userId], references: [id])
-
-  userId          Int       @unique
+model Salary {
+  id              Int           @id @default(autoincrement())
+  workingHours    Int           
+  seller          Seller        @relation(fields: [sellerId], references: [id])
+  sellerId        Int
+  salesAmount     Int           
+  salary          Int?          
+  month           DateTime
 }
 
 model Product {
-  id              Int       @id @default(autoincrement())
-  photography_url String?
-  price           Decimal
-  description     String?
-  stock           Int
-
-  category        Category  @relation(fields: [categoryName], references: [name])
-
-  categoryName    String    @map("category_name")
-
-  cartItems       CartItem[]
-  orderItems      OrderItem[]
-
+  id              Int           @id @default(autoincrement())
+  name            String        @db.VarChar(255)
+  price           Int          
+  stock           Int          
+  category        Category      @relation(fields: [categoryId], references: [id])
+  manufacturer    Manufacturer  @relation(fields: [manufacturerId], references: [id])
+  categoryId      Int
+  manufacturerId  Int
+  supplies        Supply[]
+  sales           Sale[]
+  @@index([name])
+  @@index([categoryId])
 }
 
 model Category {
-  id              Int       @id @default(autoincrement())
-  name            String    @unique
+  id              Int           @id @default(autoincrement())
+  name            String        @unique @db.VarChar(100)
   products        Product[]
 }
 
-model Cart {
-  id              Int       @id @default(autoincrement())
-  itemCount       Int
-  total           Decimal
-
-  user            User      @relation(fields: [userId], references: [id])
-
-  userId          Int       @unique
-  
-  items           CartItem[]
-  
+model Manufacturer {
+  id              Int           @id @default(autoincrement())
+  name            String        @unique @db.VarChar(100)
+  products        Product[]
 }
 
-model CartItem {
-  id              Int       @id @default(autoincrement())
-  quantity        Int
+model Supplier {
+  id              Int           @id @default(autoincrement())
+  name            String        @unique @db.VarChar(100)
+  supplies        Supply[]
+}
 
-  cart            Cart      @relation(fields: [cartId], references: [id])
-  product         Product   @relation(fields: [productId], references: [id])
+model Buyer {
+  id              Int           @id @default(autoincrement())
+  name            String        @db.VarChar(100)
+  surname         String        @db.VarChar(100)
+  ageGroup        String        @db.VarChar(50)
+  gender          String        @db.VarChar(10)
+  sales           Sale[]
+}
 
-  cartId          Int
+model Supply {
+  id           Int       @id @default(autoincrement())
+  productId    Int
+  supplierId   Int
+  quantity     Int       
+  amount       Int       
+  deliveredAt  DateTime
+  product      Product   @relation(fields: [productId], references: [id])
+  supplier     Supplier  @relation(fields: [supplierId], references: [id])
+}
+
+model Sale {
+  id              Int           @id @default(autoincrement())
+  totalAmount     Int          
+  saleDate        DateTime      @default(now())
+  quantity        Int          
+  buyerId         Int
+  sellerId        Int
   productId       Int
-}
-
-model Order {
-  id              Int       @id @default(autoincrement())
-  status          String
-  total           Decimal
-  order_date      DateTime  @default(now())
-  user            User      @relation(fields: [userId], references: [id])
-
-  userId          Int
-
-  items           OrderItem[]
-}
-
-model OrderItem {
-  id              Int       @id @default(autoincrement())
-  quantity        Int
-
-  order           Order     @relation(fields: [orderId], references: [id])
-  product         Product   @relation(fields: [productId], references: [id])
-
-  orderId         Int
-  productId       Int       
+  buyer           Buyer         @relation(fields: [buyerId], references: [id])
+  seller          Seller        @relation(fields: [sellerId], references: [id])
+  product         Product       @relation(fields:[productId], references: [id])
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([saleDate])
 }

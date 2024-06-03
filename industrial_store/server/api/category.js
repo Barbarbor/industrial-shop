@@ -1,50 +1,54 @@
-const prisma = require('../prisma/prisma')
 const express = require('express');
-const categoryApiRouter = express.Router()
+const prisma = require('../prisma/prisma');
+const categoryRouter = express.Router();
 
-const categoryRouter = express.Router()
-categoryRouter.get('', async(req,res) =>{
-    const categories = await prisma.category.findMany()
-    return res.status(200).json(categories)
-})
-
-categoryRouter.post('',async (req,res) => {
-    try{
-    const {name} = req.body
-
-    const category = await prisma.category.create({data:{name:name}})
-    return res.status(201).json(category)
-    }
-    catch(error){
-        return res.status(500).json({error:error})
-    }
-})
-
-categoryRouter.put('/:categoryId', async (req, res) => {
-    try {
-        const { categoryId } = req.params;
-        const { name } = req.body;
-        const updatedCategory = await prisma.category.update({
-            where: { id: parseInt(categoryId) },
-            data: { name }
-        });
-        return res.status(200).json(updatedCategory);
-    } catch (error) {
-        console.error('Error updating category:', error);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
+// Create a category
+categoryRouter.post('/', async (req, res) => {
+  try {
+    const { name } = req.body;
+    const category = await prisma.category.create({ data: { name } });
+    res.status(201).json(category);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create category' });
+  }
 });
 
-categoryRouter.delete('/:categoryId', async (req, res) => {
-    try {
-        const { categoryId } = req.params;
-        await prisma.category.delete({ where: { id: parseInt(categoryId) } });
-        return res.status(204).end();
-    } catch (error) {
-        console.error('Error deleting category:', error);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
+// Read all categories
+categoryRouter.get('/', async (req, res) => {
+  try {
+    const categories = await prisma.category.findMany();
+    res.status(200).json(categories);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-categoryApiRouter.use('/category',categoryRouter)
-module.exports = categoryApiRouter;
+// Update a category
+categoryRouter.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    const category = await prisma.category.update({
+      where: { id: parseInt(id) },
+      data: { name },
+    });
+    res.status(200).json(category);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update category' });
+  }
+});
+
+// Delete a category
+categoryRouter.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.category.delete({
+      where: { id: parseInt(id) },
+    });
+    res.status(200).json({ message: 'Category deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete category' });
+  }
+});
+
+module.exports = categoryRouter;
