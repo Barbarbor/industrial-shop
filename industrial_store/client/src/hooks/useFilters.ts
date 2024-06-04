@@ -3,7 +3,7 @@ import { SelectChangeEvent } from '@mui/material';
 import { TypedLazyQueryTrigger, TypedUseQueryStateResult } from '@reduxjs/toolkit/dist/query/react';
 import { QueryDefinition, BaseQueryFn } from '@reduxjs/toolkit/query';
 
-type FilterChangeEvent = React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<number>;
+export type FilterChangeEvent = React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<number>;
 
 interface UseFiltersHook<T, K> {
   reportData: T | undefined;

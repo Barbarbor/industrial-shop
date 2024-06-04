@@ -2,9 +2,12 @@ const express = require('express');
 const prisma = require('../prisma/prisma');
 const supplyRouter = express.Router();
 async function updateProductStock(productId, quantityChange) {
+  const product = await prisma.product.findUnique({where:{id: productId}})
+  const oldStock = product.stock
+  const newStock = oldStock + quantityChange
   await prisma.product.update({
     where: { id: productId },
-    data: { stock: { increment: quantityChange } },
+    data: { stock: newStock },
   });
 }
 

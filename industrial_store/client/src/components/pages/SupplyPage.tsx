@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   useLazyGetReportQuery,
   useGetCategoriesQuery,
@@ -13,6 +13,7 @@ import {
 } from '../../services/api';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import VirtualizedAutocomplete from '../shared/VirtualizedAutocomplete';
 import {
   Box,
   Button,
@@ -22,11 +23,14 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Autocomplete,
+  CircularProgress,
 } from '@mui/material';
 import useFilters from '../../hooks/useFilters'; // Adjust the import path as needed
 import { ISupply } from '../../types/Supply.types';
+import { IProduct } from '../../types/Product.types';
 
-interface IFormInput {
+export interface IFormInput {
   productId: number;
   supplierId: number;
   amount: number;
@@ -47,7 +51,7 @@ const SupplyPage: React.FC = () => {
   const { data: categories } = useGetCategoriesQuery();
   const { data: manufacturers } = useGetManufacturersQuery();
   const { data: suppliers } = useGetSuppliersQuery();
-  const { data: products } = useGetProductsQuery();
+  const { data: products,isLoading: loadingProducts } = useGetProductsQuery();
   const {data: suppliesData} = useGetSuppliesQuery()
   const [addSupply] = useAddSupplyMutation();
   const [updateSupply] = useUpdateSupplyMutation();
@@ -71,7 +75,7 @@ const SupplyPage: React.FC = () => {
   const totalQuantity = reportData?.totalQuantity || 0;
   const totalAmount = reportData?.totalAmount || 0;
 
-  const { register, handleSubmit, reset, setValue } = useForm<IFormInput>();
+  const { register, handleSubmit, reset, setValue, getValues } = useForm<IFormInput>();
 
   const [editSupplyId, setEditSupplyId] = useState<number | null>(null);
 
@@ -129,6 +133,7 @@ const SupplyPage: React.FC = () => {
         return date.toLocaleDateString('en-GB');
       },
     },
+    
     {
       field: 'actions',
       headerName: 'Actions',
@@ -157,36 +162,56 @@ const SupplyPage: React.FC = () => {
     },
   ];
 
+  // Async loading for products in AutoComplete
+  const [open, setOpen] = useState(false);
+  const [productOptions, setProductOptions] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const loading = open && productOptions.length === 0;
+
+  useEffect(() => {
+    let active = true;
+    if (!loading) return undefined;
+
+    (async () => {
+      if (products && active) {
+        setProductOptions(products.slice(0, 100));
+      }
+    })();
+
+    return () => { active = false; };
+  }, [loading, products]);
+
+  useEffect(() => {
+    if (!open) {
+      setProductOptions([]);
+      setPage(1);
+    }
+  }, [open]);
+
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h4" gutterBottom>
         Supply Management
       </Typography>
       <Typography variant="h6">
-        Total Quantity: {totalQuantity}
+        Total Quantity: {suppliesData?.totalQuantity || 0}
       </Typography>
       <Typography variant="h6">
-        Total Amount: {totalAmount}
+        Total Amount: {suppliesData?.totalAmount || 0}
       </Typography>
       <Box
         component="form"
         onSubmit={handleSubmit(onSubmit)}
         sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', mb: 4 }}
       >
-        <FormControl variant="outlined" sx={{ marginRight: 2, minWidth: 150 }}>
-          <InputLabel>Product</InputLabel>
-          <Select
-            {...register('productId', { required: true })}
-            defaultValue=""
-          >
-            {products &&
-              products.map((product) => (
-                <MenuItem key={product.id} value={product.id}>
-                  {product.name}
-                </MenuItem>
-              ))}
-          </Select>
-        </FormControl>
+         <VirtualizedAutocomplete
+          options={products || []}
+          loading={loadingProducts}
+          label="Product"
+          onChange={(event, newValue) => setValue('productId', newValue?.id)}
+          value={products?.find((p) => p.id === Number(getValues('productId')))}
+          getOptionLabel={(option) => option.name}  // Add this line
+        />
         <FormControl variant="outlined" sx={{ marginRight: 2, minWidth: 150 }}>
           <InputLabel>Supplier</InputLabel>
           <Select
@@ -203,16 +228,16 @@ const SupplyPage: React.FC = () => {
         </FormControl>
         <TextField
           {...register('amount', { required: true })}
+          label="Amount"
           type="number"
           variant="outlined"
-          placeholder="Amount"
           sx={{ marginRight: 2 }}
         />
         <TextField
           {...register('quantity', { required: true })}
+          label="Quantity"
           type="number"
           variant="outlined"
-          placeholder="Quantity"
           sx={{ marginRight: 2 }}
         />
         <TextField
@@ -229,7 +254,8 @@ const SupplyPage: React.FC = () => {
         Filters
       </Typography>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 4 }}>
-        <TextField
+        
+         <TextField
           name="startDate"
           label="Start Date"
           type="date"
@@ -247,36 +273,23 @@ const SupplyPage: React.FC = () => {
           onChange={handleFilterChange}
           sx={{ marginRight: 2 }}
         />
-        <FormControl variant="outlined" sx={{ marginRight: 2, minWidth: 150 }}>
-          <InputLabel>Product</InputLabel>
-          <Select
-            name="productId"
-            value={reportFilters.productId || ''}
-            onChange={handleFilterChange}
-            label="Product"
-          >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            {products &&
-              products.map((product) => (
-                <MenuItem key={product.id} value={product.id}>
-                  {product.name}
-                </MenuItem>
-              ))}
-          </Select>
-        </FormControl>
+      <VirtualizedAutocomplete
+  options={products || []}
+  loading={loadingProducts}
+  label="Product"
+  onChange={(event, newValue) => handleFilterChange({
+    target: { name: 'productId', value: newValue ? newValue.id : '' }
+  } as unknown as React.ChangeEvent<HTMLInputElement>)}
+  value={products?.find((p) => p.id === reportFilters.productId) || null}
+  getOptionLabel={(option) => option.name}
+/>
         <FormControl variant="outlined" sx={{ marginRight: 2, minWidth: 150 }}>
           <InputLabel>Category</InputLabel>
           <Select
             name="categoryId"
             value={reportFilters.categoryId || ''}
             onChange={handleFilterChange}
-            label="Category"
           >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
             {categories &&
               categories.map((category) => (
                 <MenuItem key={category.id} value={category.id}>
@@ -291,11 +304,7 @@ const SupplyPage: React.FC = () => {
             name="manufacturerId"
             value={reportFilters.manufacturerId || ''}
             onChange={handleFilterChange}
-            label="Manufacturer"
           >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
             {manufacturers &&
               manufacturers.map((manufacturer) => (
                 <MenuItem key={manufacturer.id} value={manufacturer.id}>
@@ -310,11 +319,7 @@ const SupplyPage: React.FC = () => {
             name="supplierId"
             value={reportFilters.supplierId || ''}
             onChange={handleFilterChange}
-            label="Supplier"
           >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
             {suppliers &&
               suppliers.map((supplier) => (
                 <MenuItem key={supplier.id} value={supplier.id}>
@@ -323,21 +328,19 @@ const SupplyPage: React.FC = () => {
               ))}
           </Select>
         </FormControl>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={applyFilters}
-          sx={{ marginRight: 2 }}
-        >
+        <Button variant="contained" color="primary" onClick={applyFilters} sx={{ marginRight: 2 }}>
           Apply Filters
         </Button>
         <Button variant="contained" color="secondary" onClick={clearFilters}>
           Clear Filters
         </Button>
-        </Box>
-        <Box sx={{ height: 'auto', width: '100%' }}>
-        <DataGrid
-          rows={supplies|| []}
+      </Box>
+      <Typography variant="h5" gutterBottom>
+        Supply Table
+      </Typography>
+      <Box sx={{ height: 400, width: '100%' }}>
+      <DataGrid
+          rows={supplies || []}
           columns={columns}
           pageSizeOptions={[5]}
           checkboxSelection
@@ -345,7 +348,7 @@ const SupplyPage: React.FC = () => {
           initialState={{
             pagination: {
               paginationModel: {
-                pageSize: 9,
+                pageSize: 10,
               },
             },
           }}
