@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { useGetSalariesQuery } from '../../services/api'; // Assuming you have a custom hook for fetching data
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { useGetSalariesQuery } from '../../services/api';
+import CustomTable from '../shared/CustomTable';
 import { Box, TextField, Button, Typography } from '@mui/material';
 import dayjs from 'dayjs';
+import { GridColDef } from '@mui/x-data-grid';
+import { ISalary } from '../../types/Salary.types';
 
 const SalaryPage: React.FC = () => {
   const [month, setMonth] = useState<string>(dayjs().format('YYYY-MM'));
   const { data: salaries, isLoading, isError, refetch } = useGetSalariesQuery(month);
+  
   const handleMonthChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMonth(event.target.value);
   };
@@ -46,21 +49,12 @@ const SalaryPage: React.FC = () => {
           Apply Filter
         </Button>
       </Box>
-      <Box sx={{ height: 500, width: '100%' }}>
-        <DataGrid
-          rows={salaries || []}
-          columns={columns}
-          pageSizeOptions={[5, 10, 15]}
-          disableRowSelectionOnClick
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 9,
-              },
-            },
-          }}
-        />
-      </Box>
+      <CustomTable<ISalary>
+        rows={salaries || []}
+        columns={columns}
+        onEdit={() => {}}
+        onDelete={() => {}}
+      />
     </Box>
   );
 };

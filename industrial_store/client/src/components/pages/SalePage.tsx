@@ -9,40 +9,17 @@ import {
   useGetBuyersQuery,
   useGetSellersQuery,
 } from '../../services/api';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from '@mui/material';
-import useFilters from '../../hooks/useFilters'; // Adjust the import path as needed
-import { ISaleResponse, ISaleFilters } from '../../types/Sale.types';
-
-interface ISaleInput {
-  saleDate: string;
-  buyerId: number;
-  sellerId: number;
-  quantity: number;
-  productId: number;
-}
-
-interface IReportFilters {
-  startDate?: string;
-  endDate?: string;
-  buyerId?: number;
-  sellerId?: number;
-  productId?: number;
-}
+import CustomForm from '../shared/CustomForm';
+import CustomTable from '../shared/CustomTable';
+import CustomFilters from '../shared/CustomFiltersForm';
+import { GridColDef } from '@mui/x-data-grid';
+import { Box, Typography } from '@mui/material';
+import useFilters from '../../hooks/useFilters';
+import { ISaleResponse, ISaleFilters, ISale } from '../../types/Sale.types';
 
 const SalePage: React.FC = () => {
   const { data: salesData, isLoading, isError, error } = useGetSalesQuery();
-  const { data: products } = useGetProductsQuery();
+  const { data: products ,isLoading:loadingProducts } = useGetProductsQuery();
   const { data: buyers } = useGetBuyersQuery();
   const { data: sellers } = useGetSellersQuery();
   const [addSale] = useAddSaleMutation();
@@ -57,7 +34,7 @@ const SalePage: React.FC = () => {
     productId: undefined,
   };
 
-  const { filters: reportFilters, reportData, applyFilters, clearFilters, handleFilterChange } = useFilters<ISaleResponse, IReportFilters>(
+  const { filters: reportFilters, reportData, applyFilters, clearFilters, handleFilterChange } = useFilters<ISaleResponse, ISaleFilters>(
     useLazyGetSalesReportQuery,
     initialFilters
   );
@@ -65,26 +42,57 @@ const SalePage: React.FC = () => {
   const sales = reportData?.sales || salesData?.sales || [];
   const totalRevenue = reportData?.totalRevenue || salesData?.totalRevenue || 0;
   const totalQuantity = reportData?.totalQuantity || salesData?.totalQuantity || 0;
-  const { register, handleSubmit, reset, setValue, getValues} = useForm<ISaleInput>();
-  const [editSaleId, setEditSaleId] = useState<number | null>(null);
 
-  const onSubmit: SubmitHandler<ISaleInput> = async (data) => {
+  const textFields = [
+    { name: 'saleDate', required: true, inputLabel: 'Sale Date', type: 'date' },
+    { name: 'quantity', required: true, inputLabel: 'Quantity', placeholder:'Quantity', type: 'number'}
+  ];
+
+  const selectFields = [
+    { name: 'buyerId', inputLabel: 'Buyer', required: true, data: buyers || [] },
+    { name: 'sellerId', inputLabel: 'Seller', required: true, data: sellers || [] },
+    
+  ];
+
+  const virtualAutocompleteFields= [
+    {
+      name: 'productId',
+      options: products || [],
+      loading: loadingProducts,
+      label: 'Product',
+      getOptionLabel: (option) => option.name,
+    }]
+  const filterTextFields = [
+    { name: 'startDate', inputLabel: 'Start Date', type: 'date' },
+    { name: 'endDate', inputLabel: 'End Date', type: 'date' }
+  ];
+
+  const filterSelectFields = [
+    { name: 'buyerId', inputLabel: 'Buyer', data: buyers || [] },
+    { name: 'sellerId', inputLabel: 'Seller', data: sellers || [] },
+    
+  ];
+
+  const [editSaleId, setEditSaleId] = useState<number | null>(null);
+  const [editSaleData, setEditSaleData] = useState<any | null>(null);
+
+  const onSubmit = async (data) => {
     if (editSaleId !== null) {
       await updateSale({ id: editSaleId, ...data }).unwrap();
       setEditSaleId(null);
+      setEditSaleData(null);
     } else {
       await addSale(data).unwrap();
+      setEditSaleData(null);
     }
-    reset();
   };
 
   const handleEdit = (sale: any) => {
     setEditSaleId(sale.id);
-    setValue('saleDate', sale.saleDate.split('T')[0]); // Assuming date is in ISO format
-    setValue('buyerId', sale.buyerId);
-    setValue('sellerId', sale.sellerId);
-    setValue('productId', sale.productId);
-    setValue('quantity', sale.quantity);
+    setEditSaleData({
+      ...sale,
+      saleDate: new Date(sale.saleDate).toISOString().substring(0, 10), // Ensure date is properly formatted
+    });
   };
 
   const handleDelete = async (id: number) => {
@@ -92,7 +100,19 @@ const SalePage: React.FC = () => {
   };
 
   if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>{error.toString()}</div>;
+
+  if (isError) {
+    if ('status' in error) {
+      const errMsg = 'error' in error ? error.error : JSON.stringify(error.data);
+      return (
+        <div>
+          <div>An error has occurred:</div>
+          <div>{errMsg}</div>
+        </div>
+      );
+    }
+    return <div>{error.message}</div>;
+  }
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
@@ -130,32 +150,6 @@ const SalePage: React.FC = () => {
       width: 150,
       valueGetter: (params) => params.row.product.name || '',
     },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 150,
-      renderCell: (params) => (
-        <Box>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => handleEdit(params.row)}
-            style={{ marginRight: 8 }}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            size="small"
-            onClick={() => handleDelete(params.row.id)}
-          >
-            Delete
-          </Button>
-        </Box>
-      ),
-    },
   ];
 
   return (
@@ -164,178 +158,36 @@ const SalePage: React.FC = () => {
         Sales Management
       </Typography>
       <Typography variant="h6">
-    Total Revenue: { totalRevenue }
-  </Typography>
-  <Typography variant="h6">
-    Total Quantity: {totalQuantity}
-  </Typography>
-      <Box
-        component="form"
-        onSubmit={handleSubmit(onSubmit)}
-        sx={{ display: 'flex', alignItems: 'center', mb: 4 }}
-      >
-        <TextField
-          {...register('saleDate', { required: true })}
-          type="date"
-          variant="outlined"
-          placeholder="Sale Date"
-          sx={{ marginRight: 2 }}
-        />
-        <FormControl sx={{ marginRight: 2, minWidth: 120 }}>
-          <InputLabel>Buyer</InputLabel>
-          <Select
-            {...register('buyerId', { required: true })}
-            label="Buyer"
-          >
-            {buyers?.map((buyer) => (
-              <MenuItem key={buyer.id} value={buyer.id}>
-                {buyer.name} {buyer.surname}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl sx={{ marginRight: 2, minWidth: 120 }}>
-          <InputLabel>Seller</InputLabel>
-          <Select
-            {...register('sellerId', { required: true })}
-            label="Seller"
-          >
-            {sellers?.map((seller) => (
-              <MenuItem key={seller.id} value={seller.id}>
-                {seller.name} {seller.surname}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl sx={{ marginRight: 2, minWidth: 120 }}>
-          <InputLabel>Product</InputLabel>
-          <Select
-            {...register('productId', { required: true })}
-            label="Product"
-          >
-            {products?.map((product) => (
-              <MenuItem key={product.id} value={product.id}>
-                {product.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <TextField
-          {...register('quantity', { required: true })}
-          type="number"
-          variant="outlined"
-          placeholder="Quantity"
-          sx={{ marginRight: 2 }}
-        />
-        <Button type="submit" variant="contained" color="primary">
-          {editSaleId ? 'Update' : 'Add'} Sale
-        </Button>
-      </Box>
-      <Typography variant="h5" gutterBottom>
-        Filters
+        Total Revenue: {totalRevenue}
       </Typography>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 4 }}>
-        <TextField
-          name="startDate"
-          label="Start Date"
-          type="date"
-          variant="outlined"
-          value={reportFilters.startDate || ''}
-          onChange={handleFilterChange}
-          sx={{ marginRight: 2 }}
-          InputLabelProps={{
-            shrink: true,
-          }}
-        />
-        <TextField
-          name="endDate"
-          label="End Date"
-          type="date"
-          variant="outlined"
-          value={reportFilters.endDate || ''}
-          onChange={handleFilterChange}
-          sx={{ marginRight: 2 }}
-          InputLabelProps={{
-            shrink: true,
-          }}
-        />
-        <FormControl sx={{ marginRight: 2, minWidth: 120 }}>
-          <InputLabel>Buyer</InputLabel>
-          <Select
-            name="buyerId"
-            value={reportFilters.buyerId || ''}
-            onChange={handleFilterChange}
-           
-          >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            {buyers?.map((buyer) => (
-              <MenuItem key={buyer.id} value={buyer.id}>
-                {buyer.name} {buyer.surname}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl sx={{ marginRight: 2, minWidth: 120 }}>
-          <InputLabel>Seller</InputLabel>
-          <Select
-            name="sellerId"
-            value={reportFilters.sellerId || ''}
-            onChange={handleFilterChange}
-            
-          >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            {sellers?.map((seller) => (
-              <MenuItem key={seller.id} value={seller.id}>
-                {seller.name} {seller.surname}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl sx={{ marginRight: 2, minWidth: 120 }}>
-          <InputLabel>Product</InputLabel>
-          <Select
-            name="productId"
-            value={reportFilters.productId || ''}
-            onChange={handleFilterChange}
-            
-          >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            {products?.map((product) => (
-              <MenuItem key={product.id} value={product.id}>
-                {product.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Button variant="contained" color="primary" onClick={applyFilters} sx={{ marginRight: 2 }}>
-          Apply Filters
-        </Button>
-        <Button variant="contained" color="secondary" onClick={clearFilters}>
-          Clear Filters
-        </Button>
-      </Box>
-      <Box sx={{ height: 'auto', width: '100%' }}>
-        <DataGrid
-          rows={sales || []}
-          columns={columns}
-          pageSizeOptions={[5]}
-          checkboxSelection
-          disableRowSelectionOnClick
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 9,
-              },
-            },
-          }}
-        />
-      </Box>
+      <Typography variant="h6">
+        Total Quantity: {totalQuantity}
+      </Typography>
+      <CustomForm<ISale>
+        formName="Sale"
+        onSubmit={onSubmit}
+        textFields={textFields}
+        selectFields={selectFields}
+        virtualAutocompleteFields={virtualAutocompleteFields}
+        editId={editSaleId}
+        initialData={editSaleData}
+
+      />
+      <CustomFilters
+        filters={reportFilters}
+        onFilterChange={handleFilterChange}
+        onApplyFilters={applyFilters}
+        onClearFilters={clearFilters}
+        filterTextFields={filterTextFields}
+        filterSelectFields={filterSelectFields}
+        virtualAutocompleteFields={virtualAutocompleteFields}
+      />
+      <CustomTable<ISale>
+        rows={sales}
+        columns={columns}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
     </Box>
   );
 };

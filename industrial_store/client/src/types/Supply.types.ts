@@ -1,4 +1,3 @@
-// types/Supply.types.ts
 export interface ISupply {
   id: number;
   productId: number;
@@ -8,19 +7,20 @@ export interface ISupply {
   deliveredAt: string;
 }
 
-export interface ICreateSupply {
-  productId: number;
-  supplierId: number;
-  amount: number;
-  quantity: number;
-  deliveredAt: string;
+export type ICreateSupply = Omit<ISupply, 'id'>;
+export type IUpdateSupply = ISupply;
+
+export interface ISupplyFilters {
+  startDate?: string;
+  endDate?: string;
+  productId?: number;
+  categoryId?: number;
+  manufacturerId?: number;
+  supplierId?: number;
 }
 
-export interface IUpdateSupply {
-  id: number;
-  productId: number;  
-  supplierId: number;
-  amount: number;
-  quantity: number;
-  deliveredAt: string;
+export interface ISuppliesResponse {
+  supplies: ISupply[];
+  totalQuantity: number;
+  totalAmount: number;
 }

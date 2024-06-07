@@ -1,15 +1,15 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Autocomplete, CircularProgress, TextField } from '@mui/material';
 import { FixedSizeList } from 'react-window';
-import { debounce } from 'lodash';
 
-interface VirtualizedAutocompleteProps {
-  options: any[];
+
+interface VirtualizedAutocompleteProps<T> {
+  options: T[];
   loading: boolean;
   label: string;
-  onChange: (event: any, newValue: any) => void;
-  value: any;
-  getOptionLabel: (option: any) => string;
+  onChange: (event: any, newValue: T | null) => void;
+  value: T | null;
+  getOptionLabel: (option: T) => string;
 }
 
 const LISTBOX_PADDING = 8; // px
@@ -24,23 +24,15 @@ function renderRow(props: any) {
   });
 }
 
-const VirtualizedAutocomplete: React.FC<VirtualizedAutocompleteProps> = ({
+const VirtualizedAutocomplete = <T,>({
   options,
   loading,
   label,
   onChange,
   value,
   getOptionLabel,
-}) => {
+}: VirtualizedAutocompleteProps<T>) => {
   const [inputValue, setInputValue] = useState('');
-
-  const debouncedOnChange = useMemo(
-    () =>
-      debounce((event, newValue) => {
-        onChange(event, newValue);
-      }, 300),
-    [onChange]
-  );
 
   const handleInputChange = useCallback((event, newInputValue) => {
     setInputValue(newInputValue);
@@ -49,7 +41,8 @@ const VirtualizedAutocomplete: React.FC<VirtualizedAutocompleteProps> = ({
   return (
     <Autocomplete
       value={value}
-      onChange={debouncedOnChange}
+      className="min-w-44"
+      onChange={onChange}
       inputValue={inputValue}
       onInputChange={handleInputChange}
       options={options}
@@ -58,7 +51,7 @@ const VirtualizedAutocomplete: React.FC<VirtualizedAutocompleteProps> = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          label={label}
+          placeholder={label}
           InputProps={{
             ...params.InputProps,
             endAdornment: (

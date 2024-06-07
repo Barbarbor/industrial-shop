@@ -6,13 +6,10 @@ import {
   useDeleteSupplierMutation,
 } from '../../services/api';
 import { ISupplier } from '../../types/Supplier.types';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { Box, Button, TextField, Typography } from '@mui/material';
-
-interface IFormInput {
-  name: string;
-}
+import CustomForm from '../shared/CustomForm';
+import CustomTable from '../shared/CustomTable';
+import { Box, Typography } from '@mui/material';
+import { GridColDef } from '@mui/x-data-grid';
 
 const SupplierPage: React.FC = () => {
   const { data: suppliers, isLoading, isError, error } = useGetSuppliersQuery();
@@ -20,36 +17,41 @@ const SupplierPage: React.FC = () => {
   const [updateSupplier] = useUpdateSupplierMutation();
   const [deleteSupplier] = useDeleteSupplierMutation();
 
-  const { register, handleSubmit, reset, setValue } = useForm<IFormInput>();
-  const [editSupplierId, setEditSupplierId] = useState<number | null>(null);
+  const textFields = [
+    { name: 'name', required: true, inputLabel: 'Name', placeholder:'Name' }
+  ];
 
-  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
+  const [editSupplierId, setEditSupplierId] = useState<number | null>(null);
+  const [editSupplierData, setEditSupplierData] = useState<ISupplier | null>(null);
+
+  const onSubmit = async (data) => {
     if (editSupplierId !== null) {
-      await updateSupplier({ id: editSupplierId, name: data.name }).unwrap();
+      await updateSupplier({ id: editSupplierId, ...data }).unwrap();
       setEditSupplierId(null);
+      setEditSupplierData(null);
     } else {
       await addSupplier(data).unwrap();
+      setEditSupplierData(null);
     }
-    reset();
   };
 
   const handleEdit = (supplier: ISupplier) => {
     setEditSupplierId(supplier.id);
-    setValue('name', supplier.name);
+    setEditSupplierData(supplier);
   };
 
   const handleDelete = async (id: number) => {
     await deleteSupplier(id).unwrap();
   };
 
-  if (isLoading) return <div>Загрузка...</div>;
+  if (isLoading) return <div>Loading...</div>;
 
   if (isError) {
     if ('status' in error) {
       const errMsg = 'error' in error ? error.error : JSON.stringify(error.data);
       return (
         <div>
-           <div>Произошла ошибка:</div>
+          <div>An error has occurred:</div>
           <div>{errMsg}</div>
         </div>
       );
@@ -59,64 +61,27 @@ const SupplierPage: React.FC = () => {
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'name',  headerName: 'Название', width: 200 },
-    {
-      field: 'actions',
-      headerName: 'Действия',
-      width: 300,
-      renderCell: (params) => (
-        <Box>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => handleEdit(params.row)}
-            style={{ marginRight: 8 }}
-          >
-             Изменить
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            size="small"
-            onClick={() => handleDelete(params.row.id)}
-          >
-              Удалить
-          </Button>
-        </Box>
-      ),
-    },
+    { field: 'name', headerName: 'Name', width: 200 }
   ];
 
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h4" gutterBottom>
-      Управление поставщиками
+        Supplier Management
       </Typography>
-      <Box
-        component="form"
-        onSubmit={handleSubmit(onSubmit)}
-        sx={{ display: 'flex', alignItems: 'center', mb: 4 }}
-      >
-        <TextField
-          {...register('name', { required: true })}
-          placeholder="Поставщик"
-          variant="outlined"
-          sx={{ marginRight: 2 }}
-        />
-        <Button type="submit" variant="contained" color="primary">
-        {editSupplierId ? 'Обновить' : 'Добавить'} поставщика
-        </Button>
-      </Box>
-      <Box sx={{ height: 400, width: '100%' }}>
-        <DataGrid
-          rows={suppliers || []}
-          columns={columns}
-          pageSizeOptions={[5]}
-          checkboxSelection
-          disableRowSelectionOnClick
-        />
-      </Box>
+      <CustomForm<ISupplier>
+        formName="Supplier"
+        onSubmit={onSubmit}
+        textFields={textFields}
+        editId={editSupplierId}
+        initialData={editSupplierData}
+      />
+      <CustomTable<ISupplier>
+        rows={suppliers || []}
+        columns={columns}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
     </Box>
   );
 };

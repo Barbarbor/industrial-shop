@@ -8,26 +8,12 @@ import {
   useGetSellersQuery,
 } from '../../services/api';
 import { ISchedule, IScheduleFilters } from '../../types/Schedule.types';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from '@mui/material';
+import CustomForm from '../shared/CustomForm';
+import CustomTable from '../shared/CustomTable';
+import CustomFilters from '../shared/CustomFiltersForm';
+import { Box, Typography } from '@mui/material';
+import { GridColDef } from '@mui/x-data-grid';
 import useFilters from '../../hooks/useFilters';
-
-interface IFormInput {
-  day: string;
-  startTime: string;
-  endTime: string;
-  sellerId: number;
-}
 
 const SchedulePage: React.FC = () => {
   const { data: schedulesData, isLoading, isError, error } = useGetSchedulesQuery();
@@ -48,27 +34,45 @@ const SchedulePage: React.FC = () => {
     initialFilters
   );
 
-  const { register, handleSubmit, reset, setValue } = useForm<IFormInput>();
+  const textFields = [
+    { name: 'day', required: true, inputLabel: 'Day', type: 'date' },
+    { name: 'startTime', required: true, inputLabel: 'Start Time', type: 'time' },
+    { name: 'endTime', required: true, inputLabel: 'End Time', type: 'time' },
+  ];
+
+  const selectFields = [
+    { name: 'sellerId', inputLabel: 'Seller', required: true, data: sellers || [] }
+  ];
+
+  const filterTextFields = [
+    { name: 'startTime', inputLabel: 'Start Time', type: 'date' },
+    { name: 'endTime', inputLabel: 'End Time', type: 'date' },
+  ];
+
+  const filterSelectFields = [
+    { name: 'sellerId', inputLabel: 'Seller', data: sellers || [] }
+  ];
+
   const [editScheduleId, setEditScheduleId] = useState<number | null>(null);
+  const [editScheduleData, setEditScheduleData] = useState<ISchedule | null>(null);
 
-  const schedules = reportData || schedulesData;
-
-  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
+  const onSubmit = async (data) => {
     if (editScheduleId !== null) {
       await updateSchedule({ id: editScheduleId, ...data }).unwrap();
       setEditScheduleId(null);
+      setEditScheduleData(null);
     } else {
       await addSchedule(data).unwrap();
+      setEditScheduleData(null);
     }
-    reset();
   };
 
   const handleEdit = (schedule: ISchedule) => {
     setEditScheduleId(schedule.id);
-    setValue('day', new Date(schedule.day).toISOString().substring(0, 10));
-    setValue('startTime', schedule.startTime);
-    setValue('endTime', schedule.endTime);
-    setValue('sellerId', schedule.sellerId);
+    setEditScheduleData({
+      ...schedule,
+      day: new Date(schedule.day).toISOString().substring(0, 10),
+    });
   };
 
   const handleDelete = async (id: number) => {
@@ -96,32 +100,6 @@ const SchedulePage: React.FC = () => {
     { field: 'startTime', headerName: 'Start Time', width: 100, valueFormatter: (params) => params.value.slice(0, 5) },
     { field: 'endTime', headerName: 'End Time', width: 100, valueFormatter: (params) => params.value.slice(0, 5) },
     { field: 'day', headerName: 'Day', width: 150, valueFormatter: (params) => new Date(params.value).toLocaleDateString() },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 150,
-      renderCell: (params) => (
-        <Box>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => handleEdit(params.row)}
-            style={{ marginRight: 8 }}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            size="small"
-            onClick={() => handleDelete(params.row.id)}
-          >
-            Delete
-          </Button>
-        </Box>
-      ),
-    },
   ];
 
   return (
@@ -129,115 +107,28 @@ const SchedulePage: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         Schedule Management
       </Typography>
-      <Box
-        component="form"
-        onSubmit={handleSubmit(onSubmit)}
-        sx={{ display: 'flex', alignItems: 'center', mb: 4 }}
-      >
-        <TextField
-          {...register('day', { required: true })}
-          type="date"
-          variant="outlined"
-          sx={{ marginRight: 2 }}
-        />
-        <TextField
-          {...register('startTime', { required: true })}
-          type="time"
-          variant="outlined"
-          sx={{ marginRight: 2 }}
-        />
-        <TextField
-          {...register('endTime', { required: true })}
-          type="time"
-          variant="outlined"
-          sx={{ marginRight: 2 }}
-        />
-        <FormControl variant="outlined" sx={{ marginRight: 2, minWidth: 150 }}>
-          <InputLabel>Seller</InputLabel>
-          <Select
-            {...register('sellerId', { required: true })}
-            label="Seller"
-          >
-            {sellers &&
-              sellers.map((seller) => (
-                <MenuItem key={seller.id} value={seller.id}>
-                  {`${seller.name} ${seller.surname}`}
-                </MenuItem>
-              ))}
-          </Select>
-        </FormControl>
-        <Button type="submit" variant="contained" color="primary">
-          {editScheduleId ? 'Update' : 'Add'} Schedule
-        </Button>
-      </Box>
-      <Typography variant="h5" gutterBottom>
-        Filters
-      </Typography>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 4 }}>
-        <FormControl variant="outlined" sx={{ marginRight: 2, minWidth: 150 }}>
-          <InputLabel>Seller</InputLabel>
-          <Select
-            name="sellerId"
-            value={filters.sellerId || ''}
-            onChange={handleFilterChange}
-            label="Seller"
-          >
-            {sellers &&
-              sellers.map((seller) => (
-                <MenuItem key={seller.id} value={seller.id}>
-                  {`${seller.name} ${seller.surname}`}
-                </MenuItem>
-              ))}
-          </Select>
-        </FormControl>
-        <TextField
-          name="startTime"
-          label="Start Time"
-          type="date"
-          variant="outlined"
-          InputLabelProps={{ shrink: true }}
-          value={filters.startTime || ''}
-          onChange={handleFilterChange}
-          sx={{ marginRight: 2 }}
-        />
-        <TextField
-          name="endTime"
-          label="End Time"
-          type="date"
-          variant="outlined"
-          InputLabelProps={{ shrink: true }}
-          value={filters.endTime || ''}
-          onChange={handleFilterChange}
-          sx={{ marginRight: 2 }}
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={applyFilters}
-          sx={{ marginRight: 2 }}
-        >
-          Apply Filters
-        </Button>
-        <Button variant="contained" color="secondary" onClick={clearFilters}>
-          Clear Filters
-        </Button>
-      </Box>
-      <Box sx={{ height: 'auto', width: '100%' }}>
-        <DataGrid
-          rows={schedules || []}
-          columns={columns}
-          pageSizeOptions={[5]}
-          checkboxSelection
-          disableRowSelectionOnClick
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 9,
-              },
-            },
-          }}
-        />
-      </Box>
+      <CustomForm
+        formName="Schedule"
+        onSubmit={onSubmit}
+        textFields={textFields}
+        selectFields={selectFields}
+        editId={editScheduleId}
+        initialData={editScheduleData}
+      />
+      <CustomFilters
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onApplyFilters={applyFilters}
+        onClearFilters={clearFilters}
+        filterTextFields={filterTextFields}
+        filterSelectFields={filterSelectFields}
+      />
+      <CustomTable
+        rows={reportData || schedulesData || []}
+        columns={columns}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
     </Box>
   );
 };

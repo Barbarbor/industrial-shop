@@ -1,14 +1,8 @@
 export interface ICategory {
-    id: number;
-    name: string;
-  }
-  
-  export interface ICreateCategory {
-    name: string;
-  }
-  
-  export interface IUpdateCategory {
-    id: number;
-    name: string;
-  }
-  
+  id: number;
+  name: string;
+}
+
+export type ICreateCategory = Omit<ICategory, 'id'>;
+
+export type IUpdateCategory = ICategory;

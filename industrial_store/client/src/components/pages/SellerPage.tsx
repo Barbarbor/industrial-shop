@@ -5,17 +5,11 @@ import {
   useUpdateSellerMutation,
   useDeleteSellerMutation,
 } from '../../services/api';
+import CustomForm from '../shared/CustomForm';
+import CustomTable from '../shared/CustomTable';
+import { GridColDef } from '@mui/x-data-grid';
+import { Box, Typography } from '@mui/material';
 import { ISeller } from '../../types/Seller.types';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { Box, Button, TextField, Typography } from '@mui/material';
-
-interface IFormInput {
-  name: string;
-  surname: string;
-  profitPercentage: number;
-  role: string;
-}
 
 const SellerPage: React.FC = () => {
   const { data: sellers, isLoading, isError, error } = useGetSellersQuery();
@@ -23,25 +17,30 @@ const SellerPage: React.FC = () => {
   const [updateSeller] = useUpdateSellerMutation();
   const [deleteSeller] = useDeleteSellerMutation();
 
-  const { register, handleSubmit, reset, setValue } = useForm<IFormInput>();
-  const [editSellerId, setEditSellerId] = useState<number | null>(null);
+  const textFields = [
+    { name: 'name', required: true, inputLabel:'Name',placeholder: 'Name' },
+    { name: 'surname', required: true, inputLabel:'Surname',placeholder: 'Surname' },
+    { name: 'profitPercentage', required: true, inputLabel:'Profit Percentage',placeholder: 'Profit Percentage', type: 'number' },
+    { name: 'role', required: true, inputLabel:'Role',placeholder: 'Role' },
+  ];
 
-  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
+  const [editSellerId, setEditSellerId] = useState<number | null>(null);
+  const [editSellerData, setEditSellerData] = useState<any | null>(null);
+
+  const onSubmit = async (data) => {
     if (editSellerId !== null) {
       await updateSeller({ id: editSellerId, ...data }).unwrap();
       setEditSellerId(null);
+      setEditSellerData(null);
     } else {
       await addSeller(data).unwrap();
+      setEditSellerData(null);
     }
-    reset();
   };
 
-  const handleEdit = (seller: ISeller) => {
+  const handleEdit = (seller: any) => {
     setEditSellerId(seller.id);
-    setValue('name', seller.name);
-    setValue('surname', seller.surname);
-    setValue('profitPercentage', seller.profitPercentage);
-    setValue('role', seller.role);
+    setEditSellerData(seller);
   };
 
   const handleDelete = async (id: number) => {
@@ -69,32 +68,6 @@ const SellerPage: React.FC = () => {
     { field: 'surname', headerName: 'Surname', width: 150 },
     { field: 'profitPercentage', headerName: 'Profit Percentage', width: 150 },
     { field: 'role', headerName: 'Role', width: 150 },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 150,
-      renderCell: (params) => (
-        <Box>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => handleEdit(params.row)}
-            style={{ marginRight: 8 }}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            size="small"
-            onClick={() => handleDelete(params.row.id)}
-          >
-            Delete
-          </Button>
-        </Box>
-      ),
-    },
   ];
 
   return (
@@ -102,56 +75,19 @@ const SellerPage: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         Seller Management
       </Typography>
-      <Box
-        component="form"
-        onSubmit={handleSubmit(onSubmit)}
-        sx={{ display: 'flex', alignItems: 'center', mb: 4 }}
-      >
-        <TextField
-          {...register('name', { required: true })}
-          variant="outlined"
-          placeholder='Seller Name'
-          sx={{ marginRight: 2 }}
-        />
-        <TextField
-          {...register('surname', { required: true })}
-          variant="outlined"
-          placeholder='Surname'
-          sx={{ marginRight: 2 }}
-        />
-        <TextField
-          {...register('profitPercentage', { required: true })}
-          type="number"
-          variant="outlined"
-          placeholder='Profit Percentage'
-          sx={{ marginRight: 2 }}
-        />
-        <TextField
-          {...register('role', { required: true })}
-          variant="outlined"
-          placeholder='Role'
-          sx={{ marginRight: 2 }}
-        />
-        <Button type="submit" variant="contained" color="primary">
-          {editSellerId ? 'Update' : 'Add'} Seller
-        </Button>
-      </Box>
-      <Box sx={{ height: 'auto', width: '100%' }}>
-        <DataGrid
-          rows={sellers || []}
-          columns={columns}
-          pageSizeOptions={[5]}
-          checkboxSelection
-          disableRowSelectionOnClick
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 9,
-              },
-            },
-          }}
-        />
-      </Box>
+      <CustomForm<ISeller>
+        formName="Seller"
+        onSubmit={onSubmit}
+        textFields={textFields}
+        editId={editSellerId}
+        initialData={editSellerData}
+      />
+      <CustomTable<ISeller>
+        rows={sellers || []}
+        columns={columns}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
     </Box>
   );
 };

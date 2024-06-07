@@ -4,12 +4,16 @@ const saleRouter = express.Router();
 
 // Create a sale
 async function updateProductStock(productId, quantityChange) {
-  await prisma.product.update({
-    where: { id: productId },
-    data: { stock: { increment: quantityChange } },
-  });
+  const updatedProduct = await prisma.product.updateMany({
+    where:{id:productId},
+    data:{
+      stock:{
+        increment: quantityChange
+      }
+    }
+  }
+  )
 }
-
 saleRouter.post('/', async (req, res) => {
   try {
     const { saleDate, buyerId, sellerId, productId, quantity } = req.body;
@@ -185,7 +189,7 @@ saleRouter.delete('/:id', async (req, res) => {
     }
 
     await prisma.sale.delete({ where: { id: parseInt(id) } });
-    await updateProductStock(existingSale.productId, existingSale.quantity);
+    await updateProductStock(existingSale.productId, -existingSale.quantity);
 
     // Update salary for the seller and month
     const month = new Date(new Date(existingSale.saleDate).getFullYear(), new Date(existingSale.saleDate).getMonth()+1, 1);

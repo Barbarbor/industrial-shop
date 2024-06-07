@@ -81,7 +81,7 @@ prisma.$use(async (params, next) => {
     });
 
     // Calculate new salary
-    const newSalary = salaryData.workingHours * 200 + salaryData.salesAmount * seller.profitPercentage * 0.01;
+    const newSalary = salaryData.workingHours * 200 + Math.floor(salaryData.salesAmount * seller.profitPercentage * 0.01);
 
     // Update salary field
     params.args.data.salary = newSalary;
