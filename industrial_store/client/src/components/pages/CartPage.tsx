@@ -9,10 +9,10 @@ const generateCartProducts = (count: number): ICartProduct[] => {
         product: {
           id: i,
           name: `Product ${i}`,
-          price: Math.floor(Math.random() * 100) + 1, // Random price between 1 and 100
-          imageUrl: `http://localhost:5173/media/shampoo.jpeg`, // Placeholder image URL
+          price: Math.floor(Math.random() * 100) + 1,
+          imageUrl: `http://localhost:5173/media/shampoo.jpeg`, 
         },
-        quantity: Math.floor(Math.random() * 5) + 1, // Random quantity between 1 and 5
+        quantity: Math.floor(Math.random() * 5) + 1, 
       });
     }
     return cartProducts;

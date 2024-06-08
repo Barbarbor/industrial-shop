@@ -6,7 +6,7 @@ interface OrderCardProps {
 }
 
 const OrderCard: React.FC<OrderCardProps> = ({ cartProducts }) => {
-  // Calculate total amount
+ 
   const totalAmount = cartProducts.reduce((total, cartProduct) => {
     return total + cartProduct.product.price * cartProduct.quantity;
   }, 0);

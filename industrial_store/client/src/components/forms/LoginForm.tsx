@@ -7,14 +7,14 @@ const LoginForm: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Perform validation and login logic
+    
     if (email.trim() === '' || password.trim() === '') {
       setError('Please enter both email and password');
       return;
     }
-    // Call login API or perform authentication
+   
     console.log('Logged in with:', { email, password });
-    // Reset form fields
+
     setEmail('');
     setPassword('');
     setError('');

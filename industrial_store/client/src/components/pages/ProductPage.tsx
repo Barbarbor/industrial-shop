@@ -1,8 +1,8 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import ProductCard from '../shared/ProductCard'; // Assuming you have a ProductCard component
+import ProductCard from '../shared/ProductCard'; 
 import { IProductDetail } from '../../types/Product.types';
-// Dummy product data
+
 const products: IProductDetail[] = [
   {
     id: 1,

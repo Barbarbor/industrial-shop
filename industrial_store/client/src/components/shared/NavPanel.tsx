@@ -4,7 +4,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import InfoIcon from '@mui/icons-material/Info';
-import { Link } from 'react-router-dom'; // You might need to install react-router-dom for this
+import { Link } from 'react-router-dom'; 
 import Logo from  "../../assets/logo7.jpg"
 const NavPanel: React.FC = () => {
     return (

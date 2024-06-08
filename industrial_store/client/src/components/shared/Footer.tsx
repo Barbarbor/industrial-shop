@@ -4,7 +4,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
-import { Link } from 'react-router-dom'; // You might need to install react-router-dom for this
+import { Link } from 'react-router-dom'; 
 
 const Footer: React.FC = () => {
   return (
@@ -22,7 +22,7 @@ const Footer: React.FC = () => {
               <span className="ml-2">+79999999999</span>
             </div>
             <form className="mt-4">
-              {/* Contact form fields go here */}
+          
             </form>
           </div>
           <div>
@@ -35,7 +35,7 @@ const Footer: React.FC = () => {
                 <Link to="/faq" className="block mb-2">FAQ</Link>
               </li>
              
-              {/* Add more links as needed */}
+            
             </ul>
           </div>
           <div>
@@ -50,7 +50,7 @@ const Footer: React.FC = () => {
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
                 <TwitterIcon />
               </a>
-              {/* Add more social media icons as needed */}
+         
             </div>
           </div>
         </div>

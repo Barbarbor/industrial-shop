@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ProductCard from '../shared/ProductCard';
 import { IProduct } from '../../types/Product.types';
-// Generate test products
+
 const generateProducts = (count: number): IProduct[] => {
   const products: IProduct[] = [];
   for (let i = 1; i <= count; i++) {
@@ -16,7 +16,7 @@ const generateProducts = (count: number): IProduct[] => {
 };
 
 const MainPage: React.FC = () => {
-  // Generate test products
+ 
   const products = generateProducts(4);
 
 

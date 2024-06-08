@@ -9,7 +9,7 @@ const RegistrationForm: React.FC = () => {
   
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      // Perform validation and registration logic
+    
       if (username.trim() === '' || email.trim() === '' || password.trim() === '' || repeatPassword.trim() === '') {
         setError('All fields are required');
         return;
@@ -18,9 +18,9 @@ const RegistrationForm: React.FC = () => {
         setError('Passwords do not match');
         return;
       }
-      // Call registration API or perform registration
+    
       console.log('Registered with:', { username, email, password });
-      // Reset form fields
+    
       setUsername('');
       setEmail('');
       setPassword('');
