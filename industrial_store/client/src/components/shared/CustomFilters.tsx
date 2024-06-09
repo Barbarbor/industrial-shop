@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
-import { Box, TextField, FormControl, Select, MenuItem, Button, InputLabel, TextFieldProps, SelectProps } from '@mui/material';
-import VirtualizedAutocomplete from '../shared/VirtualizedAutocomplete';
-import { FilterChangeEvent } from '../../hooks/useFilters';
+import {TextField,Select, MenuItem, Button, InputLabel, TextFieldProps, SelectProps } from '@mui/material';
+import VirtualizedAutocomplete from '@/components/shared/VirtualizedAutocomplete';
+import { FilterChangeEvent } from '@/hooks/useFilters';
 
 type Data = { id: number; name: string };
 type TSelectFields = (SelectProps & { name: string; data: Data[]; inputLabel?: string })[];
@@ -29,8 +29,9 @@ const CustomFilters: React.FC<CustomFiltersProps> = ({ filters, onFilterChange, 
     <div className="flex flex-wrap mb-4">
       {filterTextFields?.map((field) => (
         <div className="flex flex-col mr-4 mb-4" key={field.name}>
-          <InputLabel>{field?.inputLabel} </InputLabel>
+          <InputLabel htmlFor={field.name}>{field?.inputLabel}</InputLabel>
           <TextField
+            id={field.name}
             variant="outlined"
             type={field.type || 'text'}
             value={filters[field.name] || ''}
@@ -41,8 +42,9 @@ const CustomFilters: React.FC<CustomFiltersProps> = ({ filters, onFilterChange, 
       ))}
       {filterSelectFields?.map((field) => (
         <div className="flex flex-col mr-4 mb-4" key={field.name}>
-          <InputLabel>{field?.inputLabel} </InputLabel>
+          <InputLabel htmlFor={field.name}>{field?.inputLabel}</InputLabel>
           <Select
+            id={field.name}
             value={filters[field.name] || ''}
             onChange={onFilterChange}
             className="min-w-32"
@@ -62,7 +64,7 @@ const CustomFilters: React.FC<CustomFiltersProps> = ({ filters, onFilterChange, 
       ))}
       {virtualAutocompleteFields?.map((field) => (
         <div className="flex flex-col mr-4 mb-4" key={field.name}>
-          <InputLabel>{field.label}</InputLabel>
+          <InputLabel htmlFor={field.name}>{field.label}</InputLabel>
           <VirtualizedAutocomplete
             options={field.options}
             loading={field.loading}
@@ -75,12 +77,14 @@ const CustomFilters: React.FC<CustomFiltersProps> = ({ filters, onFilterChange, 
           />
         </div>
       ))}
-      <Button variant="contained" color="primary" onClick={onApplyFilters} className="mr-4">
-        Apply Filters
+       <div className="flex items-center space-x-4">
+      <Button  variant="contained" color="primary" onClick={onApplyFilters}>
+        Применить фильтры
       </Button>
       <Button variant="contained" color="secondary" onClick={onClearFilters}>
-        Clear Filters
+        Очистить фильтры
       </Button>
+      </div>
     </div>
   );
 };

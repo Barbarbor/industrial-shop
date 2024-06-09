@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { useForm, SubmitHandler, Controller, FieldValues, Path } from 'react-hook-form';
+import { useEffect,memo} from 'react';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { TextField, Select, MenuItem, InputLabel, TextFieldProps, SelectProps, Button } from '@mui/material';
-import VirtualizedAutocomplete from '../shared/VirtualizedAutocomplete';
+import VirtualizedAutocomplete from '@/components/shared/VirtualizedAutocomplete';
+
 interface IFormInput {
   [key: string]: any;
 }
+
 type Data = { id: number; name: string };
+
 type TSelectFields = (SelectProps & { name: string; data: Data[]; inputLabel?: string })[];
 type TTextFields = (TextFieldProps & { name: string; inputLabel?: string })[];
 type TVirtualAutocompleteFields = {
@@ -16,17 +19,17 @@ type TVirtualAutocompleteFields = {
   getOptionLabel: (option: Data) => string;
 }[];
 
-interface CustomFormProps<T extends FieldValues> {
+interface CustomFormProps {
   formName: string;
-  onSubmit: SubmitHandler<T>;
+  onSubmit: SubmitHandler<IFormInput>;
   textFields?: TTextFields;
   editId: number | null;
   selectFields?: TSelectFields;
-  initialData?: T | null;
+  initialData?: IFormInput | null;
   virtualAutocompleteFields?: TVirtualAutocompleteFields;
 }
 
-const CustomForm = <T extends FieldValues>({
+const CustomForm = ({
   formName,
   onSubmit,
   textFields,
@@ -34,26 +37,37 @@ const CustomForm = <T extends FieldValues>({
   selectFields,
   initialData,
   virtualAutocompleteFields,
-}: CustomFormProps<T>) => {
-  const { register, handleSubmit, reset, setValue, control } = useForm<T>();
+}: CustomFormProps) => {
+  const { register, handleSubmit, reset, setValue, control } = useForm<IFormInput>();
 
   useEffect(() => {
     if (initialData) {
       for (const [key, value] of Object.entries(initialData)) {
-        setValue(key as Path<T>, value);
+        setValue(key, value);
       }
     } else {
       reset();
     }
   }, [initialData, reset, setValue]);
 
+  const handleOnSubmit: SubmitHandler<IFormInput> = (data) => {
+   
+    const parsedData: IFormInput = { ...data };
+    textFields?.forEach((field) => {
+      if (field.type === 'number' && parsedData[field.name] !== undefined) {
+        parsedData[field.name] = Number(parsedData[field.name]);
+      }
+    });
+    onSubmit(parsedData);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-wrap items-center mb-4 space-x-2">
+    <form onSubmit={handleSubmit(handleOnSubmit)} className="flex flex-wrap items-center mb-4 space-x-2">
       {textFields?.map((field) => (
         <div className="flex flex-col mr-4 mb-4" key={field.name}>
           <InputLabel>{field?.inputLabel}</InputLabel>
           <TextField
-            {...register(field.name as Path<T>, { required: field.required })}
+            {...register(field.name, { required: field.required })}
             type={field.type || 'text'}
             variant="outlined"
             className="mr-2"
@@ -65,7 +79,7 @@ const CustomForm = <T extends FieldValues>({
         <div className="flex flex-col mr-4 mb-4" key={field.name}>
           <InputLabel>{field?.inputLabel}</InputLabel>
           <Controller
-            name={field.name as Path<T>}
+            name={field.name}
             control={control}
             render={({ field: controllerField }) => (
               <Select
@@ -91,14 +105,14 @@ const CustomForm = <T extends FieldValues>({
         <div className="flex flex-col mr-4 mb-4" key={field.name}>
           <InputLabel>{field.label}</InputLabel>
           <Controller
-            name={field.name as Path<T>}
+            name={field.name}
             control={control}
             render={({ field: { onChange, value } }) => (
               <VirtualizedAutocomplete
                 options={field.options}
                 loading={field.loading}
                 label={field.label}
-                value={field.options.find(option => option.id === value) || null}
+                value={field.options.find((option) => option.id === value) || null}
                 onChange={(event, newValue) => onChange(newValue ? newValue.id : null)}
                 getOptionLabel={field.getOptionLabel}
               />
@@ -108,11 +122,11 @@ const CustomForm = <T extends FieldValues>({
       ))}
       <div className="flex items-center">
         <Button type="submit" variant="contained" color="primary">
-          {editId ? 'Update' : 'Add'} {formName}
+          {editId ? 'Обновить' : 'Добавить'} {formName}
         </Button>
       </div>
     </form>
   );
 };
 
-export default CustomForm;
+export default memo(CustomForm);

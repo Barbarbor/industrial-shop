@@ -1,15 +1,16 @@
-import React from 'react';
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import SupplyPage from './components/pages/SupplyPage';
-import CategoryPage from './components/pages/CategoryPage';
-import ProductPage from './components/pages/ProductPage';
-import ManufacturerPage from './components/pages/ManufacturerPage';
-import SupplierPage from './components/pages/SupplierPage';
-import BuyerPage from './components/pages/BuyerPage';
-import SellerPage from './components/pages/SellerPage';
-import SalePage from './components/pages/SalePage';
-import SchedulePage from './components/pages/SchedulePage';
-import SalaryPage from './components/pages/SalaryPage';
+import SupplyPage from '@/pages/SupplyPage';
+import CategoryPage from '@/pages/CategoryPage';
+import ProductPage from '@/pages/ProductPage';
+import ManufacturerPage from '@/pages/ManufacturerPage';
+import SupplierPage from '@/pages/SupplierPage';
+import BuyerPage from '@/pages/BuyerPage';
+import SellerPage from '@/pages/SellerPage';
+import SalePage from '@/pages/SalePage';
+import SchedulePage from '@/pages/SchedulePage';
+import SalaryPage from '@/pages/SalaryPage';
+import NavigationPage from '@/pages/NavigationPage';
 const AppRouter = () => {
    
     return (
@@ -18,13 +19,14 @@ const AppRouter = () => {
             <Route path='/categories' element={<CategoryPage/>}/>
             <Route path='/products' element={<ProductPage/>}/>
             <Route path='/supplies' element={<SupplyPage/>}/>
-            <Route path ='/manufacturer' element={<ManufacturerPage/>}/>
-            <Route path='/supplier' element={<SupplierPage/>}/>
-            <Route path='/buyer' element = {<BuyerPage/>}/>
-            <Route path='/seller' element = {<SellerPage/>}/>
-            <Route path='/sale' element = {<SalePage/>}/>
-            <Route path='/schedule' element = {<SchedulePage/>}/>
-            <Route path='/salary' element ={<SalaryPage/>}/>
+            <Route path='/manufacturers' element={<ManufacturerPage/>}/>
+            <Route path='/suppliers' element={<SupplierPage/>}/>
+            <Route path='/buyers' element = {<BuyerPage/>}/>
+            <Route path='/sellers' element = {<SellerPage/>}/>
+            <Route path='/sales' element = {<SalePage/>}/>
+            <Route path='/schedules' element = {<SchedulePage/>}/>
+            <Route path='/salaries' element ={<SalaryPage/>}/>
+            <Route path='/' element={<NavigationPage/>}/>
           </Routes>
         </BrowserRouter>
 

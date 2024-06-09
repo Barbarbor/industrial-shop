@@ -1,14 +1,14 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { ICategory, ICreateCategory, IUpdateCategory } from '../types/Category.types';
-import { IProduct, ICreateProduct, IUpdateProduct, IProductFilters } from '../types/Product.types';
-import { ISupply, ICreateSupply, IUpdateSupply, ISupplyFilters, ISuppliesResponse } from '../types/Supply.types';
-import { ISupplier, ICreateSupplier, IUpdateSupplier } from '../types/Supplier.types';
-import { IManufacturer, ICreateManufacturer, IUpdateManufacturer } from '../types/Manufacturer.types';
-import { IBuyer,  ICreateBuyer, IUpdateBuyer } from '../types/Buyer.types';
-import { ICreateSeller, ISeller, IUpdateSeller } from '../types/Seller.types';
-import {ISale, ICreateSale,IUpdateSale, ISaleResponse, ISaleFilters} from '../types/Sale.types'
-import { ICreateSchedule, ISchedule, IScheduleFilters, IUpdateSchedule } from '../types/Schedule.types';
-import { ISalary } from '../types/Salary.types';
+import { ICategory, ICreateCategory, IUpdateCategory } from '@/types/Category.types';
+import { IProduct, ICreateProduct, IUpdateProduct, IProductFilters } from '@/types/Product.types';
+import { ISupply, ICreateSupply, IUpdateSupply, ISupplyFilters, ISuppliesResponse } from '@/types/Supply.types';
+import { ISupplier, ICreateSupplier, IUpdateSupplier } from '@/types/Supplier.types';
+import { IManufacturer, ICreateManufacturer, IUpdateManufacturer } from '@/types/Manufacturer.types';
+import { IBuyer,  ICreateBuyer, IUpdateBuyer } from '@/types/Buyer.types';
+import { ICreateSeller, ISeller, IUpdateSeller } from '@/types/Seller.types';
+import {ISale, ICreateSale,IUpdateSale, ISaleResponse, ISaleFilters} from '@/types/Sale.types'
+import { ICreateSchedule, ISchedule, IScheduleFilters, IUpdateSchedule } from '@/types/Schedule.types';
+import { ISalary } from '@/types/Salary.types';
 
 
 export const api = createApi({
@@ -62,30 +62,72 @@ export const api = createApi({
           }),
         }),
     
-    addProduct: builder.mutation<IProduct, ICreateProduct>({
-      query: (newProduct) => ({
-        url: 'product',
-        method: 'POST',
-        body: newProduct,
-      }),
-      invalidatesTags: ['Product'],
-    }),
+        addProduct: builder.mutation<IProduct, ICreateProduct>({
+          query: (newProduct) => ({
+            url: 'product',
+            method: 'POST',
+            body: newProduct,
+          }),
+          async onQueryStarted(newProduct, { dispatch, queryFulfilled }) {
+            try {
+              const { data: createdProduct } = await queryFulfilled;
+              dispatch(
+                api.util.updateQueryData('getProducts', undefined, (draft) => {
+                  draft.push(createdProduct);
+                })
+              );
+            } catch (err) {
+              console.error('Add product failed', err);
+            }
+          },
+        
+        }),
 
-    updateProduct: builder.mutation<IProduct, IUpdateProduct>({
-      query: ({ id, ...updatedProduct }) => ({
-        url: `product/${id}`,
-        method: 'PUT',
-        body: updatedProduct,
-      }),
-      invalidatesTags: ['Product'],
-    }),
+        
+        updateProduct: builder.mutation<IProduct, IUpdateProduct>({
+          query: ({ id, ...updatedProduct }) => ({
+            url: `product/${id}`,
+            method: 'PUT',
+            body: updatedProduct,
+          }),
+          async onQueryStarted({ id, ...updatedProduct }, { dispatch, queryFulfilled }) {
+            const patchResult = dispatch(
+              api.util.updateQueryData('getProducts', undefined, (draft) => {
+                const index = draft.findIndex((product) => product.id === id);
+                if (index !== -1) {
+                  draft[index] = { id, ...updatedProduct };
+                }
+              })
+            );
+            try {
+              await queryFulfilled;
+            } catch (err) {
+              patchResult.undo();
+              console.error('Update product failed', err);
+            }
+          },
+         
+        }),
 
-    deleteProduct: builder.mutation<void, number>({
-      query: (id) => ({
-        url: `product/${id}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: ['Product'],
+        deleteProduct: builder.mutation<void, number>({
+          query: (id) => ({
+            url: `product/${id}`,
+            method: 'DELETE',
+          }),
+          async onQueryStarted(id, { dispatch, queryFulfilled }) {
+            const patchResult = dispatch(
+              api.util.updateQueryData('getProducts', undefined, (draft) => {
+                return draft.filter((product) => product.id !== id);
+              })
+            );
+            try {
+              await queryFulfilled;
+            } catch (err) {
+              patchResult.undo();
+              console.error('Delete product failed', err);
+            }
+          },
+          
     }),
     
 

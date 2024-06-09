@@ -1,24 +1,28 @@
-import React, { useState } from 'react';
+// src/pages/CategoryPage.tsx
+
+import React, { useState, lazy, Suspense } from 'react';
 import {
   useGetCategoriesQuery,
   useAddCategoryMutation,
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
-} from '../../services/api';
-import { ICategory } from '../../types/Category.types';
-import CustomForm from '../shared/CustomForm';
-import CustomTable from '../shared/CustomTable';
+} from '@/services/api';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Box, Typography } from '@mui/material';
 import { GridColDef } from '@mui/x-data-grid';
+import { ICategory } from '@/types/Category.types';
+
+const CustomForm = lazy(() => import('@/components/shared/CustomForm'));
+const CustomTable = lazy(() => import('@/components/shared/CustomTable'));
 
 const CategoryPage: React.FC = () => {
-  const { data: categories, isLoading, isError, error } = useGetCategoriesQuery();
+  const { data: categories, isLoading,} = useGetCategoriesQuery();
   const [addCategory] = useAddCategoryMutation();
   const [updateCategory] = useUpdateCategoryMutation();
   const [deleteCategory] = useDeleteCategoryMutation();
 
   const textFields = [
-    { name: 'name', required: true, inputLabel: 'Name', placeholder:'Name' }
+    { name: 'name', required: true, inputLabel: 'Название', placeholder: 'Название' }
   ];
 
   const [editCategoryId, setEditCategoryId] = useState<number | null>(null);
@@ -44,24 +48,9 @@ const CategoryPage: React.FC = () => {
     await deleteCategory(id).unwrap();
   };
 
-  if (isLoading) return <div>Loading...</div>;
-
-  if (isError) {
-    if ('status' in error) {
-      const errMsg = 'error' in error ? error.error : JSON.stringify(error.data);
-      return (
-        <div>
-          <div>An error has occurred:</div>
-          <div>{errMsg}</div>
-        </div>
-      );
-    }
-    return <div>{error.message}</div>;
-  }
-
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'name', headerName: 'Name', width: 200 }
+    { field: 'name', headerName: 'Название', width: 200 }
   ];
 
   return (
@@ -69,19 +58,26 @@ const CategoryPage: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         Category Management
       </Typography>
-      <CustomForm<ICategory>
-        formName="Category"
-        onSubmit={onSubmit}
-        textFields={textFields}
-        editId={editCategoryId}
-        initialData={editCategoryData}
-      />
-      <CustomTable<ICategory>
-        rows={categories || []}
-        columns={columns}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <ErrorBoundary>
+        <Suspense fallback={<div>Загрузка формы...</div>}>
+          <CustomForm
+            formName="Категорию"
+            onSubmit={onSubmit}
+            textFields={textFields}
+            editId={editCategoryId}
+            initialData={editCategoryData}
+          />
+        </Suspense>
+        <Suspense fallback={<div>Загрузка таблицы...</div>}>
+          <CustomTable
+            isLoading = {isLoading}
+            rows={categories || []}
+            columns={columns}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </Suspense>
+      </ErrorBoundary>
     </Box>
   );
 };

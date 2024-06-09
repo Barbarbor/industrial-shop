@@ -1,15 +1,19 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Autocomplete, CircularProgress, TextField } from '@mui/material';
 import { FixedSizeList } from 'react-window';
 
+interface OptionType {
+  id: number;
+  name: string;
+}
 
-interface VirtualizedAutocompleteProps<T> {
-  options: T[];
+interface VirtualizedAutocompleteProps {
+  options: OptionType[];
   loading: boolean;
   label: string;
-  onChange: (event: any, newValue: T | null) => void;
-  value: T | null;
-  getOptionLabel: (option: T) => string;
+  onChange: (event: any, newValue: OptionType | null) => void;
+  value: OptionType | null;
+  getOptionLabel: (option: OptionType) => string;
 }
 
 const LISTBOX_PADDING = 8; // px
@@ -24,14 +28,14 @@ function renderRow(props: any) {
   });
 }
 
-const VirtualizedAutocomplete = <T,>({
+const VirtualizedAutocomplete = ({
   options,
   loading,
   label,
   onChange,
   value,
   getOptionLabel,
-}: VirtualizedAutocompleteProps<T>) => {
+}: VirtualizedAutocompleteProps) => {
   const [inputValue, setInputValue] = useState('');
 
   const handleInputChange = useCallback((event, newInputValue) => {
@@ -51,6 +55,7 @@ const VirtualizedAutocomplete = <T,>({
       renderInput={(params) => (
         <TextField
           {...params}
+          aria-label={label}
           placeholder={label}
           InputProps={{
             ...params.InputProps,
@@ -68,7 +73,7 @@ const VirtualizedAutocomplete = <T,>({
   );
 };
 
-// Adapter for react-window
+
 const ListboxComponent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLElement>>(function ListboxComponent(props, ref) {
   const { children, ...other } = props;
   const itemData = React.Children.toArray(children);

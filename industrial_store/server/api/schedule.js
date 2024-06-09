@@ -164,6 +164,17 @@ scheduleRouter.put('/:id', async (req, res) => {
      
       const month = new Date(new Date(day).getFullYear(), new Date(day).getMonth() +1, 1);
       const salaryInfo = await prisma.salary.findFirst({where:{sellerId: +sellerId, month }})
+      if(!salaryInfo){
+        await prisma.salary.create({
+          data: {
+              sellerId: +sellerId,
+              month,
+              workingHours:newWorkingHours,
+              salesAmount: 0, 
+          },
+      })
+    }
+    else{
       const workingHours = salaryInfo.workingHours + workingHoursDifference
       const salesAmount = salaryInfo.salesAmount
       await prisma.salary.update({
@@ -174,7 +185,7 @@ scheduleRouter.put('/:id', async (req, res) => {
           sellerId
         },
       });
-  
+    }
       res.status(200).json(updatedSchedule);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -192,15 +203,28 @@ scheduleRouter.put('/:id', async (req, res) => {
         return res.status(404).json({ error: 'Schedule not found' });
       }
       
+  
       const workingHours = calculateWorkingHours(oldSchedule.startTime, oldSchedule.endTime);
       const month = new Date(new Date(oldSchedule.day).getFullYear(), new Date(oldSchedule.day).getMonth() +1, 1);
+
       const salaryInfo = await prisma.salary.findFirst({where:{sellerId: +oldSchedule.sellerId, month }})
-      const newWorkingHours = salaryInfo.workingHours - workingHours
-      const salesAmount = salaryInfo.salesAmount
       await prisma.workSchedule.delete({
         where: { id: parseInt(id) },
       });
   
+      if(!salaryInfo){
+        await prisma.salary.create({
+          data: {
+              sellerId: +oldSchedule.sellerId,
+              month,
+              workingHours:0,
+              salesAmount: 0, 
+          },
+      })
+    }
+    else {
+      const newWorkingHours = salaryInfo.workingHours - workingHours
+      const salesAmount = salaryInfo.salesAmount
       await prisma.salary.update({
         where: { id: +salaryInfo.id },
         data: {
@@ -209,7 +233,7 @@ scheduleRouter.put('/:id', async (req, res) => {
           salesAmount
         },
       });
-  
+    }
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: error.message });

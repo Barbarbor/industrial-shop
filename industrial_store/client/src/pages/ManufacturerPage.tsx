@@ -1,24 +1,28 @@
-import React, { useState } from 'react';
+// src/pages/ManufacturerPage.tsx
+
+import React, { useState, lazy, Suspense } from 'react';
 import {
   useGetManufacturersQuery,
   useAddManufacturerMutation,
   useUpdateManufacturerMutation,
   useDeleteManufacturerMutation
-} from '../../services/api';
-import { IManufacturer } from '../../types/Manufacturer.types';
-import CustomForm from '../shared/CustomForm';
-import CustomTable from '../shared/CustomTable';
+} from '@/services/api';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { Box, Typography } from '@mui/material';
 import { GridColDef } from '@mui/x-data-grid';
+import { IManufacturer } from '@/types/Manufacturer.types';
+
+const CustomForm = lazy(() => import('@/components/shared/CustomForm'));
+const CustomTable = lazy(() => import('@/components/shared/CustomTable'));
 
 const ManufacturerPage: React.FC = () => {
-  const { data: manufacturers, isLoading, isError, error } = useGetManufacturersQuery();
+  const { data: manufacturers, isLoading,  } = useGetManufacturersQuery();
   const [addManufacturer] = useAddManufacturerMutation();
   const [updateManufacturer] = useUpdateManufacturerMutation();
   const [deleteManufacturer] = useDeleteManufacturerMutation();
 
   const textFields = [
-    { name: 'name', required: true, inputLabel: 'Name', placeholder:'Name' }
+    { name: 'name', required: true, inputLabel: 'Название', placeholder: 'Название' }
   ];
 
   const [editManufacturerId, setEditManufacturerId] = useState<number | null>(null);
@@ -44,44 +48,37 @@ const ManufacturerPage: React.FC = () => {
     await deleteManufacturer(id).unwrap();
   };
 
-  if (isLoading) return <div>Loading...</div>;
-
-  if (isError) {
-    if ('status' in error) {
-      const errMsg = 'error' in error ? error.error : JSON.stringify(error.data);
-      return (
-        <div>
-          <div>An error has occurred:</div>
-          <div>{errMsg}</div>
-        </div>
-      );
-    }
-    return <div>{error.message}</div>;
-  }
-
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'name', headerName: 'Name', width: 200 }
+    { field: 'name', headerName: 'Название', width: 200 }
   ];
 
+ 
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h4" gutterBottom>
         Manufacturer Management
       </Typography>
-      <CustomForm<IManufacturer>
-        formName="Manufacturer"
-        onSubmit={onSubmit}
-        textFields={textFields}
-        editId={editManufacturerId}
-        initialData={editManufacturerData}
-      />
-      <CustomTable<IManufacturer>
-        rows={manufacturers || []}
-        columns={columns}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <ErrorBoundary>
+        <Suspense fallback={<div>Загрузка формы...</div>}>
+          <CustomForm
+            formName="Производителя"
+            onSubmit={onSubmit}
+            textFields={textFields}
+            editId={editManufacturerId}
+            initialData={editManufacturerData}
+          />
+        </Suspense>
+        <Suspense fallback={<div>Загрузка таблицы...</div>}>
+          <CustomTable
+            isLoading = {isLoading}
+            rows={manufacturers || []}
+            columns={columns}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </Suspense>
+      </ErrorBoundary>
     </Box>
   );
 };

@@ -1,54 +1,70 @@
-import React from 'react';
+import {memo} from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Box, Button } from '@mui/material';
 
-interface CustomTableProps<T> {
-  rows: T[];
-  columns: GridColDef[];
-  onEdit: (row: T) => void;
-  onDelete: (id: number) => void;
+interface RowData {
+  id: number;
+  [key: string]: any;
 }
 
-const CustomTable = <T extends { id: number }>({
+interface CustomTableProps {
+  rows: RowData[];
+  columns: GridColDef[];
+  onEdit: (row: RowData) => void;
+  onDelete: (id: number) => void;
+  isLoading: boolean,
+  withoutActionButtons?: boolean
+}
+
+const CustomTable = ({
   rows,
   columns,
   onEdit,
   onDelete,
-}: CustomTableProps<T>) => {
+  isLoading,
+  withoutActionButtons
+}: CustomTableProps) => {
   const actionColumn: GridColDef = {
     field: 'actions',
-    headerName: 'Actions',
-    width: 150,
-    renderCell: (params) => (
+    headerName: 'Действия',
+    width: 210,
+    
+    renderCell: (params) => {
+     if(!withoutActionButtons)
+     return(
       <Box>
         <Button
           variant="contained"
           color="primary"
           size="small"
-          onClick={() => onEdit(params.row as T)}
+          onClick={() => onEdit(params.row as RowData)}
           className="mr-2"
+          title='Edit'
         >
-          Edit
+          Изменить
         </Button>
         <Button
           variant="contained"
           color="secondary"
           size="small"
           onClick={() => onDelete(params.row.id)}
+          title='Delete'
         >
-          Delete
+          Удалить
         </Button>
       </Box>
-    ),
+     )
+    },
   };
 
   return (
-    <div className="w-full h-auto">
+    
       <DataGrid
+        sx={{height:'631px'}}
+        loading={isLoading}
         rows={rows}
         columns={[...columns, actionColumn]}
         pageSizeOptions={[5]}
-        checkboxSelection
         disableRowSelectionOnClick
         initialState={{
           pagination: {
@@ -58,8 +74,8 @@ const CustomTable = <T extends { id: number }>({
           },
         }}
       />
-    </div>
+   
   );
 };
 
-export default CustomTable;
+export default memo(CustomTable);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { SelectChangeEvent } from '@mui/material';
-import { TypedLazyQueryTrigger, TypedUseQueryStateResult } from '@reduxjs/toolkit/dist/query/react';
-import { QueryDefinition, BaseQueryFn } from '@reduxjs/toolkit/query';
+import { TypedLazyQueryTrigger, TypedUseQueryStateResult } from '@reduxjs/toolkit/query/react';
+import { BaseQueryFn } from '@reduxjs/toolkit/query';
 
 export type FilterChangeEvent = React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<number>;
 
