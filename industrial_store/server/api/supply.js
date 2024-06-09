@@ -11,7 +11,7 @@ async function updateProductStock(productId, quantityChange) {
   });
 }
 
-// Create a supply
+
 supplyRouter.post('/', async (req, res) => {
   try {
     const { productId, supplierId, amount, quantity, deliveredAt } = req.body;
@@ -32,7 +32,7 @@ supplyRouter.post('/', async (req, res) => {
   }
 });
 
-// Read all supplies
+
 supplyRouter.get('/', async (req, res) => {
   try {
     const supplies = await prisma.supply.findMany({
@@ -49,7 +49,7 @@ supplyRouter.get('/', async (req, res) => {
   }
 });
 
-// Update a supply
+
 supplyRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -74,7 +74,7 @@ supplyRouter.put('/:id', async (req, res) => {
   }
 });
 
-// Delete a supply
+
 supplyRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -88,8 +88,7 @@ supplyRouter.delete('/:id', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-// supply report from date1 to date2
-// supplyRouter.js
+
 supplyRouter.post('/report', async (req, res) => {
   const { startDate, endDate, productId, categoryId, manufacturerId, supplierId } = req.body;
 

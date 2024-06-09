@@ -1,5 +1,3 @@
-// src/pages/BuyerPage.tsx
-
 import React, { useState, lazy, Suspense, } from 'react';
 import {
   useGetBuyersQuery,

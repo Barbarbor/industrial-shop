@@ -2,7 +2,6 @@ const express = require('express');
 const prisma = require('../prisma/prisma');
 const categoryRouter = express.Router();
 
-// Create a category
 categoryRouter.post('/', async (req, res) => {
   try {
     const { name } = req.body;
@@ -13,7 +12,6 @@ categoryRouter.post('/', async (req, res) => {
   }
 });
 
-// Read all categories
 categoryRouter.get('/', async (req, res) => {
   try {
     const categories = await prisma.category.findMany();
@@ -23,7 +21,6 @@ categoryRouter.get('/', async (req, res) => {
   }
 });
 
-// Update a category
 categoryRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -38,7 +35,6 @@ categoryRouter.put('/:id', async (req, res) => {
   }
 });
 
-// Delete a category
 categoryRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;

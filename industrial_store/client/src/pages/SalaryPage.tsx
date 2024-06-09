@@ -1,5 +1,3 @@
-// src/pages/SalaryPage.tsx
-
 import React, { useState, lazy, Suspense} from 'react';
 import { useGetSalariesQuery } from '@/services/api';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';

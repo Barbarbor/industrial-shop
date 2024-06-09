@@ -1,5 +1,3 @@
-// src/pages/ManufacturerPage.tsx
-
 import React, { useState, lazy, Suspense } from 'react';
 import {
   useGetManufacturersQuery,

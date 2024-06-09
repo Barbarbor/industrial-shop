@@ -1,5 +1,3 @@
-// src/pages/SchedulePage.tsx
-
 import React, { useState, lazy, Suspense } from 'react';
 import {
   useGetSchedulesQuery,

@@ -1,21 +1,21 @@
 const express = require('express');
-const prisma = require('../prisma/prisma'); // Assuming you have a Prisma setup file
+const prisma = require('../prisma/prisma');
 const scheduleRouter = express.Router();
 
-// Create a new schedule
+
 const calculateWorkingHours = (startTime, endTime) => {
     const start = new Date(`1970-01-01T${startTime}:00Z`);
     const end = new Date(`1970-01-01T${endTime}:00Z`);
-    const hours = (end - start) / 1000 / 60 / 60; // Convert milliseconds to hours
+    const hours = (end - start) / 1000 / 60 / 60; 
     return Math.floor(hours);
   };
   
-  // Create a new schedule
+
   scheduleRouter.post('/', async (req, res) => {
     const { day, startTime, endTime, sellerId } = req.body;
 
     try {
-        // Create new schedule
+       
         const newSchedule = await prisma.workSchedule.create({
             data: {
                 day: new Date(day),
@@ -25,13 +25,11 @@ const calculateWorkingHours = (startTime, endTime) => {
             },
         });
 
-        // Calculate working hours
+    
         const workingHours = calculateWorkingHours(startTime, endTime);
 
-        // Determine the month of the schedule
         const month = new Date(new Date(day).getFullYear(), new Date(day).getMonth() +1, 1);
 
-        // Find existing salary record for the month
         const existingSalary = await prisma.salary.findFirst({
             where: { sellerId, month  },
         });
@@ -40,7 +38,7 @@ const calculateWorkingHours = (startTime, endTime) => {
             const salesAmount = existingSalary.salesAmount
             const workinghrs = existingSalary.workingHours
             const newWorkingHours = workinghrs + workingHours
-            // Update existing salary record
+          
             await prisma.salary.update({
                 where: { id: existingSalary.id },
                 data: {
@@ -51,25 +49,23 @@ const calculateWorkingHours = (startTime, endTime) => {
                 },
             });
         } else {
-            // Create new salary record
+          
             await prisma.salary.create({
                 data: {
                     sellerId: +sellerId,
                     month,
                     workingHours,
-                    salesAmount: 0, // Assume salesAmount will be updated separately
+                    salesAmount: 0,
                 },
             });
         }
 
         res.status(201).json(newSchedule);
     } catch (error) {
-        res.status(500).json({ error: error.message }); // Provide detailed error message
+        res.status(500).json({ error: error.message });
     }
 });
 
-
-// Get all schedules
 scheduleRouter.get('/', async (req, res) => {
   try {
     const schedules = await prisma.workSchedule.findMany({
@@ -113,7 +109,6 @@ scheduleRouter.post('/filters', async (req, res) => {
     }
   });
   
-// Get schedule by ID
 scheduleRouter.get('/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -135,7 +130,6 @@ scheduleRouter.get('/:id', async (req, res) => {
   }
 });
 
-// Update a schedule
 scheduleRouter.put('/:id', async (req, res) => {
     const { id } = req.params;
     const { day, startTime, endTime, sellerId } = req.body;
@@ -192,7 +186,6 @@ scheduleRouter.put('/:id', async (req, res) => {
     }
   });
   
-  // Delete a schedule
   scheduleRouter.delete('/:id', async (req, res) => {
     const { id } = req.params;
   

@@ -2,7 +2,6 @@ const express = require('express');
 const prisma = require('../prisma/prisma');
 const buyerRouter = express.Router();
 
-// Create a buyer
 buyerRouter.post('/', async (req, res) => {
   try {
     const { name, surname, ageGroup, gender} = req.body;
@@ -21,7 +20,6 @@ buyerRouter.post('/', async (req, res) => {
   }
 });
 
-// Read all buyers
 buyerRouter.get('/', async (req, res) => {
   try {
     const buyers = await prisma.buyer.findMany({});
@@ -31,7 +29,6 @@ buyerRouter.get('/', async (req, res) => {
   }
 });
 
-// Update a buyer
 buyerRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -52,7 +49,6 @@ buyerRouter.put('/:id', async (req, res) => {
   }
 });
 
-// Delete a buyer
 buyerRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;

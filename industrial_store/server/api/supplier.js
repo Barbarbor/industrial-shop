@@ -2,7 +2,6 @@ const express = require('express');
 const prisma = require('../prisma/prisma');
 const supplierRouter = express.Router();
 
-// Create a supplier
 supplierRouter.post('/', async (req, res) => {
   try {
     const { name } = req.body;
@@ -13,7 +12,6 @@ supplierRouter.post('/', async (req, res) => {
   }
 });
 
-// Read all suppliers
 supplierRouter.get('/', async (req, res) => {
   try {
     const suppliers = await prisma.supplier.findMany();
@@ -23,7 +21,6 @@ supplierRouter.get('/', async (req, res) => {
   }
 });
 
-// Update a supplier
 supplierRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -38,7 +35,6 @@ supplierRouter.put('/:id', async (req, res) => {
   }
 });
 
-// Delete a supplier
 supplierRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;

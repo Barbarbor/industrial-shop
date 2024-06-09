@@ -1,7 +1,6 @@
 const { PrismaClient, Prisma } = require('@prisma/client');
 const { z } = require('zod');
 
-// Zod Schemas
 const SellerSchema = z.object({
   name: z.string().max(100),
   surname: z.string().max(100),
@@ -11,8 +10,8 @@ const SellerSchema = z.object({
 
 const WorkScheduleSchema = z.object({
   day: z.date(),
-  startTime: z.string().regex(/^\d{2}:\d{2}$/), // Assuming format "HH:mm"
-  endTime: z.string().regex(/^\d{2}:\d{2}$/),   // Assuming format "HH:mm"
+  startTime: z.string().regex(/^\d{2}:\d{2}$/), 
+  endTime: z.string().regex(/^\d{2}:\d{2}$/),   
   sellerId: z.number().int(),
 });
 
@@ -70,20 +69,18 @@ const SaleSchema = z.object({
 
 const prisma = new PrismaClient();
 
-// Existing middleware for salary calculation
+
 prisma.$use(async (params, next) => {
   if (params.model === 'Salary' && (params.action === 'create' || params.action === 'update')) {
     const salaryData = params.args.data;
 
-    // Get seller's profitPercentage
+ 
     const seller = await prisma.seller.findFirst({
       where: { id: salaryData.sellerId },
     });
 
-    // Calculate new salary
     const newSalary = salaryData.workingHours * 200 + Math.floor(salaryData.salesAmount * seller.profitPercentage * 0.01);
 
-    // Update salary field
     params.args.data.salary = newSalary;
   }
 

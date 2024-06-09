@@ -2,7 +2,6 @@ const express = require('express');
 const prisma = require('../prisma/prisma');
 const productRouter = express.Router();
 
-// Create a product
 productRouter.post('/', async (req, res) => {
   try {
     const { name, price, stock, categoryId, manufacturerId } = req.body;
@@ -25,7 +24,6 @@ productRouter.post('/', async (req, res) => {
   }
 });
 
-// Read all products
 productRouter.get('/', async (req, res) => {
   try {
     const products = await prisma.product.findMany();
@@ -58,7 +56,7 @@ productRouter.post('/filters', async (req, res) => {
   }
 });
 
-// Read products by name
+
 productRouter.get('/search', async (req, res) => {
   try {
     const { name } = req.query;
@@ -75,7 +73,6 @@ productRouter.get('/search', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch products by name' });
   }
 });
-// Update a product
 productRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -100,7 +97,6 @@ productRouter.put('/:id', async (req, res) => {
   }
 });
 
-// Delete a product
 productRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;

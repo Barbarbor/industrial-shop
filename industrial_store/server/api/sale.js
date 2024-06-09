@@ -2,7 +2,7 @@ const express = require('express');
 const prisma = require('../prisma/prisma');
 const saleRouter = express.Router();
 
-// Create a sale
+
 async function updateProductStock(productId, quantityChange) {
   const updatedProduct = await prisma.product.updateMany({
     where:{id:productId},
@@ -34,7 +34,6 @@ saleRouter.post('/', async (req, res) => {
 
     await updateProductStock(parsedProductId, -parsedQuantity);
 
-    // Update salary for the seller and month
     const month = new Date(new Date(saleDate).getFullYear(), new Date(saleDate).getMonth() + 1, 1);
     const existingSalary = await prisma.salary.findFirst({
       where: { sellerId: parsedSellerId, month },
@@ -46,7 +45,7 @@ saleRouter.post('/', async (req, res) => {
         data: {
           salesAmount: existingSalary.salesAmount + totalAmount,
           sellerId: parsedSellerId,
-          workingHours: existingSalary.workingHours, // No change to workingHours here
+          workingHours: existingSalary.workingHours, 
         },
       });
     } else {
@@ -54,7 +53,7 @@ saleRouter.post('/', async (req, res) => {
         data: {
           sellerId: parsedSellerId,
           month,
-          workingHours: 0, // Assume workingHours will be updated separately
+          workingHours: 0, 
           salesAmount: totalAmount,
         },
       });
@@ -95,7 +94,7 @@ saleRouter.post('/report', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-// Read all sales
+
 saleRouter.get('/', async (req, res) => {
   try {
     const sales = await prisma.sale.findMany({
@@ -115,7 +114,6 @@ saleRouter.get('/', async (req, res) => {
   }
 });
 
-// Update a sale
 saleRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -146,7 +144,7 @@ saleRouter.put('/:id', async (req, res) => {
 
     await updateProductStock(parsedProductId, quantityChange);
 
-    // Update salary for the seller and month
+  
     const month = new Date(new Date(saleDate).getFullYear(), new Date(saleDate).getMonth() + 1, 1);
     const existingSalary = await prisma.salary.findFirst({
       where: { sellerId: parsedSellerId, month },
@@ -158,7 +156,7 @@ saleRouter.put('/:id', async (req, res) => {
         data: {
           salesAmount: existingSalary.salesAmount + amountChange,
           sellerId: parsedSellerId,
-          workingHours: existingSalary.workingHours, // No change to workingHours here
+          workingHours: existingSalary.workingHours, 
         },
       });
     } else {
@@ -166,7 +164,7 @@ saleRouter.put('/:id', async (req, res) => {
         data: {
           sellerId: parsedSellerId,
           month,
-          workingHours: 0, // Assume workingHours will be updated separately
+          workingHours: 0, 
           salesAmount: newTotalAmount,
         },
       });
@@ -178,7 +176,7 @@ saleRouter.put('/:id', async (req, res) => {
   }
 });
 
-// Delete a sale
+
 saleRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -191,7 +189,7 @@ saleRouter.delete('/:id', async (req, res) => {
     await prisma.sale.delete({ where: { id: parseInt(id) } });
     await updateProductStock(existingSale.productId, -existingSale.quantity);
 
-    // Update salary for the seller and month
+ 
     const month = new Date(new Date(existingSale.saleDate).getFullYear(), new Date(existingSale.saleDate).getMonth()+1, 1);
     const existingSalary = await prisma.salary.findFirst({
       where: { sellerId: existingSale.sellerId, month },
@@ -203,7 +201,7 @@ saleRouter.delete('/:id', async (req, res) => {
         data: {
           salesAmount: existingSalary.salesAmount - existingSale.totalAmount,
           sellerId: existingSale.sellerId,
-          workingHours: existingSalary.workingHours, // No change to workingHours here
+          workingHours: existingSalary.workingHours, 
         },
       });
     }

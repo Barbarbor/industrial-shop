@@ -1,5 +1,3 @@
-// src/pages/SalePage.tsx
-
 import React, { useState, lazy, Suspense } from 'react';
 import {
   useLazyGetSalesReportQuery,

@@ -1,5 +1,3 @@
-// src/pages/CategoryPage.tsx
-
 import React, { useState, lazy, Suspense } from 'react';
 import {
   useGetCategoriesQuery,

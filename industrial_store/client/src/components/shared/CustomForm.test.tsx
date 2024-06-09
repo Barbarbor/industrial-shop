@@ -115,12 +115,11 @@ describe('CustomForm', () => {
     fireEvent.change(nameInput, { target: { value: 'Updated Name' } });
     fireEvent.change(priceInput, { target: { value: 200 } });
     
-    // Open the select dropdown
     fireEvent.mouseDown(categoryInput);
     await waitFor(() => screen.getByRole('option', { name: /category 2/i }));
     fireEvent.click(screen.getByRole('option', { name: /category 2/i }));
 
-    // Open the autocomplete dropdown
+  
     fireEvent.mouseDown(productInput);
     await waitFor(() => screen.getByRole('option', { name: /product 2/i }));
     fireEvent.click(screen.getByRole('option', { name: /product 2/i }));
