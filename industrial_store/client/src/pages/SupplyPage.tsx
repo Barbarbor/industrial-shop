@@ -16,7 +16,6 @@ import { ISupply, ISupplyFilters, ISuppliesResponse } from '@/types/Supply.types
 import { Box, Typography } from '@mui/material';
 import { GridColDef } from '@mui/x-data-grid';
 import { getFormattedDate, getName } from '@/utils/utils';
-
 const CustomForm = lazy(() => import('@/components/shared/CustomForm'));
 const CustomTable = lazy(() => import('@/components/shared/CustomTable'));
 const CustomFilters = lazy(() => import('@/components/shared/CustomFilters'));
@@ -110,17 +109,17 @@ const SupplyPage: React.FC = () => {
     {
       field: 'productId',
       headerName: 'Товар',
-      width: 150,
+      width: 300,
       valueGetter: getName(products),
     },
     {
       field: 'supplierId',
       headerName: 'Поставщик',
-      width: 150,
+      width: 250,
       valueGetter: getName(suppliers),
     },
-    { field: 'amount', headerName: 'Сумма поставки', width: 100 },
-    { field: 'quantity', headerName: 'Количество товара', width: 100 },
+    { field: 'amount', headerName: 'Сумма поставки', width: 150, valueFormatter: (params) => `${params.value}₽` },
+    { field: 'quantity', headerName: 'Количество товара', width: 150 },
     {
       field: 'deliveredAt',
       headerName: 'Дата поставки',
@@ -135,10 +134,10 @@ const SupplyPage: React.FC = () => {
         Управление поставками
       </Typography>
       <Typography variant="h6">
-        Поставленное количество: {totalQuantity}
+        Поставленное количество: {totalQuantity} шт.
       </Typography>
       <Typography variant="h6">
-        Поставлено на сумму: {totalAmount}
+        Поставлено на сумму: {totalAmount}₽
       </Typography>
       <ErrorBoundary>
         <Suspense fallback={<div>Загрузка формы...</div>}>

@@ -70,7 +70,7 @@ const CustomFilters: React.FC<CustomFiltersProps> = ({ filters, onFilterChange, 
             loading={field.loading}
             label={field.label}
             value={field.options.find(option => option.id === filters[field.name]) || null}
-            onChange={(event, newValue) => onFilterChange({
+            onChange={(_event, newValue) => onFilterChange({
               target: { name: field.name, value: newValue ? newValue.id : '' }
             } as unknown as React.ChangeEvent<HTMLInputElement>)}
             getOptionLabel={field.getOptionLabel}

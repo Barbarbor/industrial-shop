@@ -113,7 +113,7 @@ const CustomForm = ({
                 loading={field.loading}
                 label={field.label}
                 value={field.options.find((option) => option.id === value) || null}
-                onChange={(event, newValue) => onChange(newValue ? newValue.id : null)}
+                onChange={(_event, newValue) => onChange(newValue ? newValue.id : null)}
                 getOptionLabel={field.getOptionLabel}
               />
             )}

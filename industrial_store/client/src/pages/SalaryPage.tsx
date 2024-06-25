@@ -26,9 +26,9 @@ const SalaryPage: React.FC = () => {
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'sellerId', headerName: 'Продавец', width: 150 },
    { field: 'month', headerName: 'Месяц', width: 150 },
-    { field: 'salesAmount', headerName: 'Сумма продаж', width: 150 },
+    { field: 'salesAmount', headerName: 'Сумма продаж', width: 150, valueFormatter: (params) => `${params.value}₽`  },
     { field: 'workingHours', headerName: 'Отработанные часы', width: 150 },
-    { field: 'salary', headerName: 'Зарплата', width: 150 },
+    { field: 'salary', headerName: 'Зарплата', width: 150, valueFormatter: (params) => `${params.value}₽`  },
   ];
 
   return (

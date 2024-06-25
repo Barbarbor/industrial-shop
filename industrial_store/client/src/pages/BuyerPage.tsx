@@ -60,7 +60,7 @@ const BuyerPage: React.FC = () => {
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Buyer Management
+        Управление покупателями
       </Typography>
       <ErrorBoundary>
         <Suspense fallback={<div>Загрузка формы...</div>}>

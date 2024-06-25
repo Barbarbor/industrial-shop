@@ -84,10 +84,10 @@ const SchedulePage: React.FC = () => {
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'sellerName', headerName: 'Seller Name', width: 200, valueGetter: getFullSellerName() },
-    { field: 'startTime', headerName: 'Start Time', width: 100, valueFormatter: getFormattedTime },
-    { field: 'endTime', headerName: 'End Time', width: 100, valueFormatter: getFormattedTime },
-    { field: 'day', headerName: 'Day', width: 150, valueFormatter: getFormattedDate },
+    { field: 'sellerName', headerName: 'Продавец', width: 250, valueGetter: getFullSellerName() },
+    { field: 'startTime', headerName: 'Начало смены', width: 150, valueFormatter: getFormattedTime },
+    { field: 'endTime', headerName: 'Конец смены', width: 150, valueFormatter: getFormattedTime },
+    { field: 'day', headerName: 'День', width: 150, valueFormatter: getFormattedDate },
   ];
 
   return (

@@ -51,7 +51,7 @@ const ProductPage: React.FC = () => {
   ];
 
   const filterTextFields = [
-    { name: 'name', inputLabel: 'Name', placeholder: 'Name' },
+    { name: 'name', inputLabel: 'Название', placeholder: 'Название' },
   ];
 
   const filterSelectFields = [
@@ -86,13 +86,13 @@ const ProductPage: React.FC = () => {
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'name', headerName: 'Название', width: 200 },
-    { field: 'price', headerName: 'Цена', width: 100 },
-    { field: 'stock', headerName: 'Запас', width: 100 },
+    { field: 'name', headerName: 'Название', width: 300 },
+    { field: 'price', headerName: 'Цена', width: 200, valueFormatter: (params) => `${params.value}₽` },
+    { field: 'stock', headerName: 'Количество товара на складе', width: 250 },
     {
       field: 'categoryId',
       headerName: 'Категория',
-      width: 150,
+      width: 250,
       valueGetter: getName(categories),
     },
     {
@@ -106,7 +106,7 @@ const ProductPage: React.FC = () => {
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Product Management
+        Управление товарами
       </Typography>
       <ErrorBoundary>
         <Suspense fallback={<div>Загрузка формы...</div>}>

@@ -55,7 +55,7 @@ const ManufacturerPage: React.FC = () => {
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Manufacturer Management
+        Управление производителями
       </Typography>
       <ErrorBoundary>
         <Suspense fallback={<div>Загрузка формы...</div>}>

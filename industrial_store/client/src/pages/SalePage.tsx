@@ -106,7 +106,11 @@ const SalePage: React.FC = () => {
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'totalAmount', headerName: 'Сумма продажи', width: 150 },
+    { field: 'totalAmount', 
+      headerName: 'Сумма продажи', 
+      width: 150,
+      valueFormatter: (params) => `${params.value}₽` 
+    },
     {
       field: 'saleDate',
       headerName: 'Дата продажи',
@@ -116,13 +120,13 @@ const SalePage: React.FC = () => {
     {
       field: 'buyer',
       headerName: 'Покупатель',
-      width: 150,
+      width: 200,
       valueGetter: getFullBuyerName(),
     },
     {
       field: 'seller',
       headerName: 'Продавец',
-      width: 150,
+      width: 200,
       valueGetter: getFullSellerName(),
     },
     {
@@ -133,7 +137,7 @@ const SalePage: React.FC = () => {
     {
       field: 'item',
       headerName: 'Товар',
-      width: 150,
+      width: 300,
       valueGetter: getProductName(),
     },
   ];
@@ -144,10 +148,10 @@ const SalePage: React.FC = () => {
         Управление продажами
       </Typography>
       <Typography variant="h6">
-        Общая сумма продаж: {totalRevenue}
+        Общая сумма продаж: {totalRevenue}₽
       </Typography>
       <Typography variant="h6">
-        Общее проданное количество: {totalQuantity}
+        Общее проданное количество: {totalQuantity} шт.
       </Typography>
       <ErrorBoundary>
         <Suspense fallback={<div>Загрузка формы...</div>}>

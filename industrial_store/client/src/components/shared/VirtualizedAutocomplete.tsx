@@ -38,7 +38,7 @@ const VirtualizedAutocomplete = ({
 }: VirtualizedAutocompleteProps) => {
   const [inputValue, setInputValue] = useState('');
 
-  const handleInputChange = useCallback((event, newInputValue) => {
+  const handleInputChange = useCallback((_event, newInputValue) => {
     setInputValue(newInputValue);
   }, []);
 

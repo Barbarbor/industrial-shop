@@ -55,7 +55,7 @@ const NavigationPage = () => {
         </ListItem>
         <ListItem component="li" className="mb-2">
           <Link to="/salaries" className="text-blue-600 hover:underline">
-            <ListItemText primary="Зарплаты продавцом" />
+            <ListItemText primary="Зарплаты продавцов" />
           </Link>
         </ListItem>
       </List>

@@ -70,8 +70,13 @@ saleRouter.post('/report', async (req, res) => {
 
   try {
     const whereClause = {
-      ...(startDate && { saleDate: { gte: new Date(startDate) } }),
-      ...(endDate && { saleDate: { lte: new Date(endDate) } }),
+      ...(startDate || endDate) && {
+        saleDate: {
+          ...(startDate && { gte: new Date(startDate) }),
+          ...(endDate && { lte: new Date(endDate) || new Date() }),
+        },
+      },
+     
       ...(buyerId && { buyerId: parseInt(buyerId) }),
       ...(sellerId && { sellerId: parseInt(sellerId) }),
       ...(productId && { productId: parseInt(productId) }),
@@ -124,7 +129,7 @@ saleRouter.put('/:id', async (req, res) => {
     if (!existingSale) {
       return res.status(404).json({ error: 'Sale not found' });
     }
-
+   
     const product = await prisma.product.findUnique({ where: { id: parsedProductId } });
     const newTotalAmount = product.price * parsedQuantity;
     const amountChange = newTotalAmount - existingSale.totalAmount;

@@ -1,11 +1,11 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CustomFilters from './CustomFilters';
-import { FilterChangeEvent } from '@/hooks/useFilters';
+
 import { describe, it, expect, vi } from 'vitest';
 
 describe('CustomFilters', () => {
-  const mockOnFilterChange = vi.fn((e: FilterChangeEvent) => {});
+  const mockOnFilterChange = vi.fn(() => {});
   const mockOnApplyFilters = vi.fn();
   const mockOnClearFilters = vi.fn();
 

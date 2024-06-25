@@ -68,7 +68,7 @@ export const api = createApi({
             method: 'POST',
             body: newProduct,
           }),
-          async onQueryStarted(newProduct, { dispatch, queryFulfilled }) {
+          async onQueryStarted(_newProduct, { dispatch, queryFulfilled }) {
             try {
               const { data: createdProduct } = await queryFulfilled;
               dispatch(

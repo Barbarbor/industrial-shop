@@ -48,13 +48,13 @@ const CategoryPage: React.FC = () => {
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'name', headerName: 'Название', width: 200 }
+    { field: 'name', headerName: 'Название', width: 350 }
   ];
 
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Category Management
+        Управление категориями
       </Typography>
       <ErrorBoundary>
         <Suspense fallback={<div>Загрузка формы...</div>}>

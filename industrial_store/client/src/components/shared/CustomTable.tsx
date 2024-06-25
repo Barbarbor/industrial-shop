@@ -60,7 +60,7 @@ const CustomTable = ({
   return (
     
       <DataGrid
-        sx={{height:'631px'}}
+        sx={{height:'632px'}}
         loading={isLoading}
         rows={rows}
         columns={[...columns, actionColumn]}
